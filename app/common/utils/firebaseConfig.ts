@@ -1,8 +1,5 @@
-// src/common/utils/firebaseConfig.ts
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getAnalytics } from "firebase/analytics";
-
 
 export const firebaseConfig = {
   apiKey: "AIzaSyBe4mSlim2Dsm4JPNe9ecbEd8sOpZX_rGw",
@@ -19,3 +16,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 export { auth };
+
+// Export default to satisfy expo-router requirement
+export default app;

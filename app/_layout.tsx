@@ -13,8 +13,13 @@ export default function RootLayout() {
       />
 
       <Stack.Screen 
-        name="modules/auth/screens/IntroScreen" 
+        name="modules/auth/screens/MainScreen" 
         options={{ title: 'Inicio' }}
+      />
+
+      <Stack.Screen 
+        name="modules/auth/screens/RegisterScreen" 
+        options={{ title: 'Regístrate' }}
       />
     </Stack>
   );

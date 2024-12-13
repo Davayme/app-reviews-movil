@@ -13,7 +13,7 @@ export default function LoginScreen() {
     try {
       const user = await login(email, password);
       console.log('User:', user);
-      router.push('/modules/movies/screens/IndexScreen');
+      router.push('/modules/movies/screens/MainScreen');
     } catch (error: any) {
       Alert.alert('Login Failed', error.message);
     }
