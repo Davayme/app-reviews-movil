@@ -25,7 +25,7 @@ export default function RootLayout() {
     >
       <Stack.Screen 
         name="index" 
-        options={{ title: 'Inicio', headerShown: false }} 
+        options={{headerShown: false }} 
 
       />
       <Stack.Screen 

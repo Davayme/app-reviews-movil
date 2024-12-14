@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "app-reviews-movil",
+    "name": "Cine Score",
     "slug": "app-reviews-movil",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -16,7 +16,11 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.davayme.appreviewsmovil"
+      "package": "com.davayme.appreviewsmovil",
+      "statusBar": {
+        "backgroundColor": "#1b1b1b",
+        "barStyle": "light-content"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -45,8 +49,6 @@
       "eas": {
         "projectId": "ac5024af-935d-42a7-b4b4-512ad9bedf77"
       },
-      "apiUrl": "https://api.example.com",
-      "apiKey": "your_api_key_here",
       "tmdbApiUrl": "https://api.themoviedb.org/3",
       "tmdbBearerToken": "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwMjc4MzU2YjI5ZGM3NGEzNjNjMjhkZjhmMGE1MDFkZiIsIm5iZiI6MTcyMjM2MDQxMi4xNDIwMDAyLCJzdWIiOiI2NmE5MjI1YzhkYmYxY2YzMjZlM2FhZmUiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.TVGf1h1GzCjkm5ZYTT-dUEH4eNk3ZfYvkpCG4SXXwWs"
     }
