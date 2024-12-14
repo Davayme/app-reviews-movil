@@ -29,7 +29,6 @@ export const getPopularMovies = async () => {
     const response = await fetch(url, options);
     const data = await response.json();
     const posterPaths = data.results.slice(0, 6).map((movie: any) => movie.poster_path);
-    console.log(posterPaths);
     return posterPaths;
   } catch (error) {
     console.error('Error fetching popular movies:', error);

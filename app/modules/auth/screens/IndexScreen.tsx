@@ -72,14 +72,14 @@ export default function IndexScreen() {
             onPress={() => router.push('/modules/auth/screens/LoginScreen')}
           >
             <Icon name="sign-in" size={20} color="#1b1b1b" style={tw`mr-2`} />
-            <Text style={[tw`text-lg text-center`, styles.buttonText]}>Ir al Login</Text>
+            <Text style={[tw`text-lg text-center`, styles.buttonText]}>Iniciar Sesión</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[tw`flex-row items-center justify-center p-4 rounded-lg mt-4 w-64`, styles.registerButton]}
             onPress={() => router.push('/modules/auth/screens/RegisterScreen')}
           >
             <Icon name="user-plus" size={20} color="#1b1b1b" style={tw`mr-2`} />
-            <Text style={[tw`text-lg text-center`, styles.buttonText]}>Registrarse</Text>
+            <Text style={[tw`text-lg text-center`, styles.buttonText]}>Regístrate</Text>
           </TouchableOpacity>
         </Animated.View>
       </View>
