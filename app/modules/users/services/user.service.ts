@@ -1,4 +1,4 @@
-// src/modules/auth/services/authService.ts
+/* // src/modules/auth/services/authService.ts
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../../common/utils/firebaseConfig";
 
@@ -9,4 +9,4 @@ export const login = async (email: string, password: string) => {
   } catch (error) {
     throw error;
   }
-};
+}; */

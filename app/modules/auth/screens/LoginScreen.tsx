@@ -9,13 +9,14 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import tw from "tailwind-react-native-classnames";
-import Icon from "react-native-vector-icons/FontAwesome";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import FontAwesome from "react-native-vector-icons/FontAwesome";
 import { colors } from "../../../common/utils/constants";
 import { useToast } from "@/app/common/components/Toast/useToast";
 import { loginUser } from "../services/authServices";
 import { StyleSheet } from "react-native";
 import { FirebaseError } from "firebase/app";
-import { MaterialIcons } from "@expo/vector-icons";
+import { useAuth } from '../hooks/useAuth';
 
 interface FormField {
   value: string;
@@ -26,6 +27,7 @@ interface FormData {
   email: FormField;
   password: FormField;
 }
+
 export default function LoginScreen() {
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -35,6 +37,8 @@ export default function LoginScreen() {
     email: { value: "", error: "" },
     password: { value: "", error: "" },
   });
+
+  const { signIn } = useAuth();
 
   const validateField = (name: keyof FormData, value: string) => {
     let error = "";
@@ -74,6 +78,7 @@ export default function LoginScreen() {
       !formData.password.error
     );
   };
+
   const getFocusedStyle = (fieldName: string, color: string) => ({
     backgroundColor: "#2d2d2d",
     color: "#fff",
@@ -91,7 +96,8 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      await loginUser(formData.email.value, formData.password.value);
+      const userData = await loginUser(formData.email.value, formData.password.value);
+      await signIn(userData); 
       showToast("¡Bienvenido de nuevo!", "success");
       router.push("/modules/movies/screens/MainScreen");
     } catch (error: unknown) {
@@ -219,7 +225,7 @@ export default function LoginScreen() {
                 <ActivityIndicator color="#fff" />
               ) : (
                 <View style={tw`flex-row items-center justify-center`}>
-                  <Icon
+                  <FontAwesome
                     name="sign-in"
                     size={20}
                     color="#fff"
@@ -245,7 +251,7 @@ export default function LoginScreen() {
               }
             >
               <View style={tw`flex-row items-center justify-center`}>
-                <Icon
+                <FontAwesome
                   name="user-plus"
                   size={20}
                   color={colors.yellow}
