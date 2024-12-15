@@ -2,6 +2,7 @@ import React from "react";
 import { Stack } from "expo-router";
 import { DefaultTheme } from "@react-navigation/native";
 import { ToastProvider } from "./common/components/Toast/ToastProvider";
+import { HeaderRight } from "./common/components/Header/HeaderRight";
 
 const customTheme = {
   ...DefaultTheme,
@@ -32,7 +33,17 @@ export default function RootLayout() {
         />
         <Stack.Screen
           name="modules/movies/screens/MainScreen"
-          options={{ title: "Inicio" }}
+          options={{
+            title: "Inicio",
+            headerRight: () => <HeaderRight />,
+            headerStyle: {
+              backgroundColor: "#1b1b1b",
+            },
+            headerTintColor: "#ffffff",
+            headerTitleStyle: {
+              fontWeight: "bold",
+            },
+          }}
         />
         <Stack.Screen
           name="modules/auth/screens/RegisterScreen"

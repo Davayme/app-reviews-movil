@@ -11,11 +11,11 @@ export const firebaseConfig = {
   measurementId: "G-RQ0XZBHEFF"
 };
 
-// Initialize Firebase
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 export { auth };
 
-// Export default to satisfy expo-router requirement
+
 export default app;

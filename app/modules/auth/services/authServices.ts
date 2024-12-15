@@ -3,8 +3,10 @@ import { createUserWithEmailAndPassword, deleteUser, signInWithEmailAndPassword 
 import { auth } from "../../../common/utils/firebaseConfig";
 import Constants from 'expo-constants';
 import { API_URL } from "@/app/common/utils/constants";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { tmdbApiUrl, tmdbBearerToken } = Constants.manifest.extra;
+const USER_STORAGE_KEY = '@user_data';
 
 export const getPopularMovies = async () => {
   const url = `${tmdbApiUrl}/movie/popular?language=es-ES&page=1`;
@@ -88,7 +90,7 @@ export const loginUser = async (email: string, password: string) => {
     }
 
     const userData = await response.json();
-    console.log('User data from backend:', userData);
+    await storeUserData(userData);
     return userData;
 
   } catch (error: any) {
@@ -99,5 +101,32 @@ export const loginUser = async (email: string, password: string) => {
       throw new Error('Contraseña incorrecta');
     }
     throw error;
+  }
+};
+
+const storeUserData = async (userData: any) => {
+  try {
+    await AsyncStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
+  } catch (error) {
+    console.error('Error storing user data:', error);
+    throw new Error('Error al guardar datos del usuario');
+  }
+};
+
+export const getUserData = async () => {
+  try {
+    const jsonValue = await AsyncStorage.getItem(USER_STORAGE_KEY);
+    return jsonValue != null ? JSON.parse(jsonValue) : null;
+  } catch (error) {
+    console.error('Error getting user data:', error);
+    return null;
+  }
+};
+
+export const clearUserData = async () => {
+  try {
+    await AsyncStorage.removeItem(USER_STORAGE_KEY);
+  } catch (error) {
+    console.error('Error clearing user data:', error);
   }
 };

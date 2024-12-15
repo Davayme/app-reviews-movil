@@ -15,6 +15,7 @@ import { useToast } from "@/app/common/components/Toast/useToast";
 import { loginUser } from "../services/authServices";
 import { StyleSheet } from "react-native";
 import { FirebaseError } from "firebase/app";
+import { MaterialIcons } from "@expo/vector-icons";
 
 interface FormField {
   value: string;
@@ -144,7 +145,7 @@ export default function LoginScreen() {
               <View
                 style={tw`absolute inset-y-0 left-0 pl-4 flex items-center justify-center`}
               >
-                <Icon name="envelope" size={18} color={colors.azul} />
+                <MaterialIcons name="email" size={18} color={colors.azul} />
               </View>
               <TextInput
                 style={[
@@ -174,7 +175,7 @@ export default function LoginScreen() {
               <View
                 style={tw`absolute inset-y-0 left-0 pl-4 flex items-center justify-center`}
               >
-                <Icon name="lock" size={18} color={colors.magenta} />
+                <MaterialIcons name="lock" size={18} color={colors.magenta} />
               </View>
               <TextInput
                 style={[
