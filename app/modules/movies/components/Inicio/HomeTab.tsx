@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ScrollView } from 'react-native';
 import { CarouselMovies } from './CarouselMovies';
-import { getPopularMovies, getNowPlayingMovies } from '../../services/movieService';
 import { useAuth } from '@/app/modules/auth/hooks/useAuth';
 import { LoadingScreen } from '@/app/common/components/Loading/LoadingScreen';
+import { getPopularMovies, getNowPlayingMovies } from '../../services/movieService';
 import { Movie } from '@/app/common/interfaces/IMovie';
 import tw from 'tailwind-react-native-classnames';
 
@@ -14,21 +14,21 @@ export default function HomeTab() {
   const [nowPlayingMovies, setNowPlayingMovies] = useState<Movie[]>([]);
 
   useEffect(() => {
-    loadAllMovies();
+    loadInitialData();
   }, []);
 
-  const loadAllMovies = async () => {
+  const loadInitialData = async () => {
     try {
       setIsLoading(true);
       const [popularData, nowPlayingData] = await Promise.all([
-        getPopularMovies(user?.id || 1),
-        getNowPlayingMovies(user?.id || 1)
+        getPopularMovies(user?.id || 1, 1),
+        getNowPlayingMovies(user?.id || 1, 1)
       ]);
 
       setPopularMovies(popularData.results);
       setNowPlayingMovies(nowPlayingData.results);
     } catch (error) {
-      console.error('Error loading movies:', error);
+      console.error('Error loading initial data:', error);
     } finally {
       setIsLoading(false);
     }
@@ -45,11 +45,15 @@ export default function HomeTab() {
     >
       <CarouselMovies
         title="Películas Populares"
-        movies={popularMovies}
+        userId={user?.id || 1}
+        initialMovies={popularMovies}
+        fetchMovies={getPopularMovies}
       />
       <CarouselMovies
         title="Últimos Estrenos"
-        movies={nowPlayingMovies}
+        userId={user?.id || 1}
+        initialMovies={nowPlayingMovies}
+        fetchMovies={getNowPlayingMovies}
       />
     </ScrollView>
   );

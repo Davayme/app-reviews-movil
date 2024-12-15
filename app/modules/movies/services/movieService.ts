@@ -2,14 +2,20 @@ import { API_URL } from '@/app/common/utils/constants';
 import { MovieResponse } from '@/app/common/interfaces/IMovie';
 
 export const getPopularMovies = async (userId: number, page: number = 1): Promise<MovieResponse> => {
+  console.log('Fetching popular movies:', { userId, page }); // Debug
   try {
     const response = await fetch(
       `${API_URL}/movies/popular?idUser=${userId}&language=es-ES&page=${page}`
     );
-    if (!response.ok) throw new Error('Error al obtener películas populares');
-    return await response.json();
+    const data = await response.json();
+    console.log('API Response:', {
+      page: data.page,
+      totalPages: data.total_pages,
+      results: data.results.length
+    });
+    return data;
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error fetching movies:', error);
     throw error;
   }
 };
