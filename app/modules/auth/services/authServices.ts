@@ -72,3 +72,32 @@ export const registerUser = async (email: string, password: string, name?: strin
     throw new Error(error.message || 'Error al registrar el usuario.');
   }
 };
+
+
+// Agregar nueva función
+export const loginUser = async (email: string, password: string) => {
+  try {
+    // Firebase auth
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const uid = userCredential.user.uid;
+
+    // Backend request
+    const response = await fetch(`${API_URL}/user/${uid}`);
+    if (!response.ok) {
+      throw new Error('Error al obtener datos del usuario');
+    }
+
+    const userData = await response.json();
+    console.log('User data from backend:', userData);
+    return userData;
+
+  } catch (error: any) {
+    if (error.code === 'auth/user-not-found') {
+      throw new Error('Usuario no encontrado');
+    }
+    if (error.code === 'auth/wrong-password') {
+      throw new Error('Contraseña incorrecta');
+    }
+    throw error;
+  }
+};
