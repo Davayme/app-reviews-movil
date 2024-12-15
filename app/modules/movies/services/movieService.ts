@@ -1,13 +1,26 @@
-// src/services/movieService.ts
+import { API_URL } from '@/app/common/utils/constants';
+import { MovieResponse } from '@/app/common/interfaces/IMovie';
 
-export const getNowPlayingMovies = async (idUser: number, language: string, page: number, region: string) => {
+export const getPopularMovies = async (userId: number, page: number = 1): Promise<MovieResponse> => {
   try {
-    const response = await fetch(`http://localhost:3000/movies/now-playing?idUser=${idUser}&language=${language}&page=${page}&region=${region}`);
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    const data = await response.json();
-    return data.results; // Devolver solo la propiedad results
+    const response = await fetch(
+      `${API_URL}/movies/popular?idUser=${userId}&language=es-ES&page=${page}`
+    );
+    if (!response.ok) throw new Error('Error al obtener películas populares');
+    return await response.json();
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
+};
+
+export const getNowPlayingMovies = async (userId: number, page: number = 1): Promise<MovieResponse> => {
+  try {
+    const response = await fetch(
+      `${API_URL}/movies/now-playing?idUser=${userId}&language=es-ES&page=${page}`
+    );
+    if (!response.ok) throw new Error('Error al obtener películas en cartelera');
+    return await response.json();
   } catch (error) {
     console.error('Error:', error);
     throw error;

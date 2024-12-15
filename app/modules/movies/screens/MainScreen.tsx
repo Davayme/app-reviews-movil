@@ -2,7 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors } from '../../../common/utils/constants';
-import HomeTab from '../components/HomeTab';
+import HomeTab from '../components/Inicio/HomeTab';
 import ReviewsTab from '../components/ReviewsTab';
 import WatchlistTab from '../components/WatchlistTab';
 
