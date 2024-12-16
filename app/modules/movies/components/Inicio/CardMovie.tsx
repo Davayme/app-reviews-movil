@@ -37,7 +37,6 @@ export const CardMovie: React.FC<CardMovieProps> = ({
   const { user } = useAuth();
   const { showToast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const { watchlist, toggleWatchlist } = useWatchlist();
   const [showModal, setShowModal] = useState(false);
   const [inWatchlist, setInWatchlist] = useState(movie.inWatchlist);
 
@@ -64,7 +63,6 @@ export const CardMovie: React.FC<CardMovieProps> = ({
       }
       setInWatchlist(!inWatchlist);
       onWatchlistChange?.(movie.id, !inWatchlist);
-      toggleWatchlist(movie.id);
     } catch (error) {
       showToast("Ocurrió un error. Intenta nuevamente", "error");
     } finally {

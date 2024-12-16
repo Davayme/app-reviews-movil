@@ -1,30 +1,36 @@
 import React, { createContext, useContext, useState } from 'react';
-import { Movie } from '@/app/common/interfaces/IMovie';
 
-interface WatchlistContextProps {
+export const WatchlistContext = createContext<WatchlistContextType | undefined>(undefined);
+
+interface WatchlistContextType {
   watchlist: Set<number>;
   toggleWatchlist: (movieId: number) => void;
+  lastUpdatedMovie: {
+    id: number;
+    inWatchlist: boolean;
+  } | null;
 }
 
-const WatchlistContext = createContext<WatchlistContextProps | undefined>(undefined);
-
-export const WatchlistProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
+export const WatchlistProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [watchlist, setWatchlist] = useState<Set<number>>(new Set());
+  const [lastUpdatedMovie, setLastUpdatedMovie] = useState<{id: number; inWatchlist: boolean} | null>(null);
 
   const toggleWatchlist = (movieId: number) => {
-    setWatchlist(prev => {
-      const newWatchlist = new Set(prev);
-      if (newWatchlist.has(movieId)) {
-        newWatchlist.delete(movieId);
-      } else {
-        newWatchlist.add(movieId);
-      }
-      return newWatchlist;
-    });
+    const newWatchlist = new Set(watchlist);
+    const inWatchlist = !newWatchlist.has(movieId);
+    
+    if (inWatchlist) {
+      newWatchlist.add(movieId);
+    } else {
+      newWatchlist.delete(movieId);
+    }
+    
+    setWatchlist(newWatchlist);
+    setLastUpdatedMovie({ id: movieId, inWatchlist });
   };
 
   return (
-    <WatchlistContext.Provider value={{ watchlist, toggleWatchlist }}>
+    <WatchlistContext.Provider value={{ watchlist, toggleWatchlist, lastUpdatedMovie }}>
       {children}
     </WatchlistContext.Provider>
   );

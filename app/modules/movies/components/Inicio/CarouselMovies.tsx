@@ -9,7 +9,7 @@ import { Movie } from "@/app/common/interfaces/IMovie";
 import { colors } from "@/app/common/utils/constants";
 import { CardMovie } from "./CardMovie";
 import tw from "tailwind-react-native-classnames";
-import { StyleSheet, Animated } from "react-native";
+import { StyleSheet } from "react-native";
 import { useWatchlist } from "../../context/WatchlistContext";
 import { MaterialIcons } from "@expo/vector-icons";
 
@@ -31,16 +31,19 @@ export const CarouselMovies: React.FC<CarouselMoviesProps> = ({
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [page, setPage] = useState(1);
   const flatListRef = useRef<FlatList>(null);
-  const { watchlist } = useWatchlist();
+  const { watchlist, lastUpdatedMovie } = useWatchlist();
 
   useEffect(() => {
-    setMovies(prevMovies => 
-      prevMovies.map(movie => ({
-        ...movie,
-        inWatchlist: watchlist.has(movie.id)
-      }))
-    );
-  }, [watchlist]);
+    if (lastUpdatedMovie) {
+      setMovies(prevMovies =>
+        prevMovies.map(movie =>
+          movie.id === lastUpdatedMovie.id
+            ? { ...movie, inWatchlist: lastUpdatedMovie.inWatchlist }
+            : movie
+        )
+      );
+    }
+  }, [lastUpdatedMovie]);
 
   const handleScroll = (event: any) => {
     const offsetX = event.nativeEvent.contentOffset.x;
