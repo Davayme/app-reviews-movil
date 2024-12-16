@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, FlatList, ActivityIndicator } from "react-native";
 import { Movie } from "@/app/common/interfaces/IMovie";
 import { colors } from "@/app/common/utils/constants";
 import { CardMovie } from "./CardMovie";
 import tw from "tailwind-react-native-classnames";
 import { getPopularMovies } from "../../services/movieService";
+import { StyleSheet } from "react-native";
 
 interface CarouselMoviesProps {
   title: string;
@@ -56,10 +57,11 @@ export const CarouselMovies: React.FC<CarouselMoviesProps> = ({
     }
   };
 
-  const handleEndReached = () => {
-    console.log(`Reached end of ${title}`);
-    loadMoreMovies();
-  };
+  const LoadingSpinner = () => (
+    <View style={styles.loadingContainer}>
+      <ActivityIndicator size="large" color={colors.azul} />
+    </View>
+  );
 
   return (
     <View style={tw`mb-6`}>
@@ -75,14 +77,17 @@ export const CarouselMovies: React.FC<CarouselMoviesProps> = ({
         contentContainerStyle={tw`px-4`}
         onEndReached={loadMoreMovies}
         onEndReachedThreshold={0.5}
-        ListFooterComponent={() =>
-          isLoadingMore ? (
-            <View style={tw`justify-center px-4`}>
-              <ActivityIndicator color={colors.azul} />
-            </View>
-          ) : null
-        }
+        ListFooterComponent={() => (isLoadingMore ? <LoadingSpinner /> : null)}
       />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    width: 80,
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});
