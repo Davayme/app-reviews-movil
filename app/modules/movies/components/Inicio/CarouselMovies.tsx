@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
-  Text,
   FlatList,
   ActivityIndicator,
   TouchableOpacity,
@@ -11,11 +10,10 @@ import { colors } from "@/app/common/utils/constants";
 import { CardMovie } from "./CardMovie";
 import tw from "tailwind-react-native-classnames";
 import { StyleSheet, Animated } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
 import { useWatchlist } from "../../context/WatchlistContext";
+import { MaterialIcons } from "@expo/vector-icons";
 
 interface CarouselMoviesProps {
-  title: string;
   userId: number;
   initialMovies: Movie[];
   fetchMovies: (userId: number, page: number) => Promise<any>;
@@ -23,7 +21,6 @@ interface CarouselMoviesProps {
 }
 
 export const CarouselMovies: React.FC<CarouselMoviesProps> = ({
-  title,
   userId,
   initialMovies,
   fetchMovies,
@@ -34,15 +31,8 @@ export const CarouselMovies: React.FC<CarouselMoviesProps> = ({
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [page, setPage] = useState(1);
   const flatListRef = useRef<FlatList>(null);
-  const titleOpacity = useRef(new Animated.Value(0)).current;
   const { watchlist } = useWatchlist();
-  const handleScroll = (event: any) => {
-    const offsetX = event.nativeEvent.contentOffset.x;
-    setShowScrollButton(offsetX > 50);
-  };
-  const scrollToStart = () => {
-    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
-  };
+
   useEffect(() => {
     setMovies(prevMovies => 
       prevMovies.map(movie => ({
@@ -50,14 +40,16 @@ export const CarouselMovies: React.FC<CarouselMoviesProps> = ({
         inWatchlist: watchlist.has(movie.id)
       }))
     );
-    Animated.timing(titleOpacity, {
-      toValue: 1,
-      duration: 800,
-      useNativeDriver: true,
-    }).start();
   }, [watchlist]);
 
+  const handleScroll = (event: any) => {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    setShowScrollButton(offsetX > 50);
+  };
 
+  const scrollToStart = () => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
 
   const loadMoreMovies = async () => {
     if (isLoadingMore) return;
@@ -90,19 +82,6 @@ export const CarouselMovies: React.FC<CarouselMoviesProps> = ({
 
   return (
     <View style={tw`mb-6 relative`}>
-      <Animated.View
-        style={[tw`flex-row items-center mb-4 px-4`, { opacity: titleOpacity }]}
-      >
-        <MaterialIcons
-          name={title.includes("Populares") ? "local-fire-department" : "movie"}
-          size={24}
-          color={colors.yellow}
-          style={tw`mr-2`}
-        />
-        <Text style={[tw`text-xl font-bold`, { color: colors.yellow }]}>
-          {title}
-        </Text>
-      </Animated.View>
       <FlatList
         ref={flatListRef}
         data={movies}
@@ -154,14 +133,5 @@ const styles = StyleSheet.create({
     height: "100%",
     justifyContent: "center",
     alignItems: "center",
-  },
-  titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 16,
-    paddingHorizontal: 16,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.magenta,
-    paddingLeft: 12,
   },
 });
