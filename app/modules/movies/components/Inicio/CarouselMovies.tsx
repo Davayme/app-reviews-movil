@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, ActivityIndicator } from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import { View, Text, FlatList, ActivityIndicator, TouchableOpacity } from "react-native";
 import { Movie } from "@/app/common/interfaces/IMovie";
 import { colors } from "@/app/common/utils/constants";
 import { CardMovie } from "./CardMovie";
 import tw from "tailwind-react-native-classnames";
 import { getPopularMovies } from "../../services/movieService";
 import { StyleSheet } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 
 interface CarouselMoviesProps {
   title: string;
@@ -22,8 +23,16 @@ export const CarouselMovies: React.FC<CarouselMoviesProps> = ({
 }) => {
   const [movies, setMovies] = useState<Movie[]>(initialMovies);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [showScrollButton, setShowScrollButton] = useState(false);
   const [page, setPage] = useState(1);
-
+  const flatListRef = useRef<FlatList>(null);
+  const handleScroll = (event: any) => {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    setShowScrollButton(offsetX > 50);
+  };
+  const scrollToStart = () => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
   useEffect(() => {
     loadMovies();
   }, []);
@@ -64,30 +73,60 @@ export const CarouselMovies: React.FC<CarouselMoviesProps> = ({
   );
 
   return (
-    <View style={tw`mb-6`}>
+    <View style={tw`mb-6 relative`}>
       <Text style={[tw`text-xl font-bold mb-4 px-4`, { color: colors.yellow }]}>
         {title}
       </Text>
       <FlatList
+        ref={flatListRef}
         data={movies}
         horizontal
         showsHorizontalScrollIndicator={false}
         renderItem={({ item }) => <CardMovie movie={item} />}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={tw`px-4`}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
         onEndReached={loadMoreMovies}
         onEndReachedThreshold={0.5}
         ListFooterComponent={() => (isLoadingMore ? <LoadingSpinner /> : null)}
       />
+
+      {showScrollButton && (
+        <TouchableOpacity style={styles.scrollButton} onPress={scrollToStart}>
+          <MaterialIcons name="arrow-back" size={24} color={colors.gris} />
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollButton: {
+    position: 'absolute',
+    left: 15,
+    top: '50%',
+    transform: [{ translateY: -20 }], // Mitad del height del botón
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    borderRadius: 25,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 8,
+    zIndex: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+  },
   loadingContainer: {
     width: 80,
-    height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-  },
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 });
