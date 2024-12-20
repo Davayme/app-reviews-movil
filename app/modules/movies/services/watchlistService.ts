@@ -1,3 +1,4 @@
+import { IWatchlistResponse } from '@/app/common/interfaces/IWatchlist';
 import { API_URL } from '@/app/common/utils/constants';
 
 interface AddToWatchlistDto {
@@ -47,6 +48,30 @@ export const removeFromWatchlist = async (userId: number, movieId: number): Prom
     return await response.json();
   } catch (error) {
     console.error('Error en removeFromWatchlist:', error);
+    throw error;
+  }
+};
+
+export const getUserWatchlist = async (userId: number): Promise<IWatchlistResponse> => {
+  try {
+    const response = await fetch(
+      `${API_URL}/watchlist/${userId}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Error al obtener el watchlist');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error en getUserWatchlist:', error);
     throw error;
   }
 };

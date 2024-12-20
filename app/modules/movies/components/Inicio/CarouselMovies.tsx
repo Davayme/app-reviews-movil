@@ -63,11 +63,14 @@ export const CarouselMovies: React.FC<CarouselMoviesProps> = ({
       const data = await fetchMovies(userId, nextPage);
 
       if (data.results.length > 0) {
-        const newMovies = data.results.map((movie: Movie) => ({
-          ...movie,
-          inWatchlist: watchlist.has(movie.id)
-        }));
-        setMovies(prev => [...prev, ...newMovies]);
+        // Usar una función para actualizar el estado para evitar cierres anticipados
+        setMovies(prev => {
+          const newMovies = data.results.map((movie: Movie) => ({
+            ...movie,
+            inWatchlist: watchlist.has(movie.id)
+          }));
+          return [...prev, ...newMovies];
+        });
         setPage(nextPage);
       }
     } catch (error) {
@@ -76,6 +79,16 @@ export const CarouselMovies: React.FC<CarouselMoviesProps> = ({
       setIsLoadingMore(false);
     }
   };
+
+  const memoizedCardMovie = React.useCallback(
+    ({ item }: { item: Movie }) => (
+      <CardMovie 
+        movie={item} 
+        onWatchlistChange={onWatchlistChange}
+      />
+    ),
+    [onWatchlistChange]
+  );
 
   const LoadingSpinner = () => (
     <View style={styles.loadingContainer}>
@@ -90,7 +103,7 @@ export const CarouselMovies: React.FC<CarouselMoviesProps> = ({
         data={movies}
         horizontal
         showsHorizontalScrollIndicator={false}
-        renderItem={({ item }) => <CardMovie movie={item} onWatchlistChange={onWatchlistChange}/>}
+        renderItem={memoizedCardMovie}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={tw`px-4`}
         onScroll={handleScroll}

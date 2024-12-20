@@ -3,8 +3,8 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialIcons } from "@expo/vector-icons";
 import { colors } from "../../../common/utils/constants";
 import HomeTab from "../components/Inicio/HomeTab";
-import ReviewsTab from "../components/ReviewsTab";
-import WatchlistTab from "../components/WatchlistTab";
+import ReviewsTab from "../components/Reviews/ReviewsTab";
+import WatchlistTab from "../components/Watchlist/WatchlistTab";
 import { WatchlistProvider } from "../context/WatchlistContext";
 
 const Tab = createBottomTabNavigator();
