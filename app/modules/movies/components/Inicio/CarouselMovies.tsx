@@ -66,7 +66,8 @@ export const CarouselMovies: React.FC<CarouselMoviesProps> = ({
         setMovies(prev => {
           const newMovies = data.results.map((movie: Movie) => ({
             ...movie,
-            inWatchlist: movie.inWatchlist // Aseguramos que el estado se mantenga
+            inWatchlist: movie.inWatchlist, // Aseguramos que el estado se mantenga
+            vote_average: movie.vote_average // Aseguramos que el estado se mantenga
           }));
           return [...prev, ...newMovies];
         });
