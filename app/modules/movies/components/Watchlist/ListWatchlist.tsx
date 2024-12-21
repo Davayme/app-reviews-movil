@@ -1,34 +1,27 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
   FlatList,
   RefreshControl,
-  Image,
-  TouchableOpacity,
-  Dimensions,
   ActivityIndicator,
   StatusBar,
-} from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import { getUserWatchlist } from '../../services/watchlistService';
-import { colors } from '@/app/common/utils/constants';
-import { IWatchlistItem } from '@/app/common/interfaces/IWatchlist';
-import { useAuth } from '@/app/modules/auth/hooks/useAuth';
-import tw from 'tailwind-react-native-classnames';
-import Animated, { FadeInUp } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
-import { CardWatchlistMovie } from './CardWatchlistMovie';
-
-const { width } = Dimensions.get('window');
-const COLUMN_WIDTH = (width - 48) / 2;
+  TouchableOpacity,
+} from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
+import { getUserWatchlist } from "../../services/watchlistService";
+import { colors } from "@/app/common/utils/constants";
+import { IWatchlistItem } from "@/app/common/interfaces/IWatchlist";
+import { useAuth } from "@/app/modules/auth/hooks/useAuth";
+import tw from "tailwind-react-native-classnames";
+import { CardWatchlistMovie } from "./CardWatchlistMovie";
 
 export const ListWatchlist = () => {
   const { user } = useAuth();
   const [movies, setMovies] = useState<IWatchlistItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [filter, setFilter] = useState<'all' | 'viewed' | 'pending'>('all');
+  const [filter, setFilter] = useState<"all" | "viewed" | "pending">("all");
 
   const loadWatchlist = async () => {
     try {
@@ -52,14 +45,20 @@ export const ListWatchlist = () => {
     setRefreshing(false);
   }, []);
 
+  const handleToggleViewed = (id: number, viewed: boolean) => {
+    setMovies(prevMovies =>
+      prevMovies.map(movie =>
+        movie.id === id ? { ...movie, viewed } : movie
+      )
+    );
+  };
+
   const renderMovie = ({ item, index }: { item: IWatchlistItem; index: number }) => (
     <CardWatchlistMovie 
       item={item} 
       index={index}
-      onToggleViewed={(id) => {
-        // TODO: Implementar toggle viewed
-        console.log('Toggle viewed:', id);
-      }}
+      userId={user?.id || 0}
+      onToggleViewed={handleToggleViewed}
     />
   );
 
@@ -88,56 +87,61 @@ export const ListWatchlist = () => {
     );
   }
 
+  const FilterButton = ({ 
+    label, 
+    value, 
+    icon 
+  }: { 
+    label: string, 
+    value: "all" | "viewed" | "pending",
+    icon: string
+  }) => (
+    <TouchableOpacity
+      style={[
+        tw`px-4 py-2 rounded-full flex-row items-center`,
+        filter === value && { backgroundColor: colors.magenta }
+      ]}
+      onPress={() => setFilter(value)}
+    >
+      <MaterialIcons
+        name={icon as keyof typeof MaterialIcons.glyphMap}
+        size={16}
+        color={filter === value ? '#fff' : colors.gris}
+        style={tw`mr-2`}
+      />
+      <Text style={[
+        tw`font-medium`,
+        { color: filter === value ? '#fff' : colors.gris }
+      ]}>
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
+
   return (
-    <View style={[tw`flex-1`, { backgroundColor: colors['background-color'] }]}>
-      <StatusBar backgroundColor={colors['background-color']} barStyle="light-content" />
+    <View style={[tw`flex-1`, { backgroundColor: colors["background-color"] }]}>
+      <StatusBar backgroundColor={colors["background-color"]} barStyle="light-content" />
       
       <View style={tw`flex-row justify-center py-6`}>
         <View style={[tw`flex-row rounded-full p-1`, { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
-          <TouchableOpacity
-            style={[
-              tw`px-4 py-2 rounded-full`,
-              filter === 'all' && { backgroundColor: colors.magenta }
-            ]}
-            onPress={() => setFilter('all')}
-          >
-            <Text style={[
-              tw`font-medium`,
-              { color: filter === 'all' ? '#fff' : colors.gris }
-            ]}>
-              Todas
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              tw`px-4 py-2 rounded-full`,
-              filter === 'pending' && { backgroundColor: colors.magenta }
-            ]}
-            onPress={() => setFilter('pending')}
-          >
-            <Text style={[
-              tw`font-medium`,
-              { color: filter === 'pending' ? '#fff' : colors.gris }
-            ]}>
-              Pendientes
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              tw`px-4 py-2 rounded-full`,
-              filter === 'viewed' && { backgroundColor: colors.magenta }
-            ]}
-            onPress={() => setFilter('viewed')}
-          >
-            <Text style={[
-              tw`font-medium`,
-              { color: filter === 'viewed' ? '#fff' : colors.gris }
-            ]}>
-              Vistas
-            </Text>
-          </TouchableOpacity>
+          <FilterButton
+            label="Todas"
+            value="all"
+            icon="local-movies"
+          />
+          <FilterButton
+            label="Pendientes"
+            value="pending"
+            icon="watch-later"
+          />
+          <FilterButton
+            label="Vistas"
+            value="viewed"
+            icon="done-all"
+          />
         </View>
       </View>
+
       <FlatList
         data={movies.filter(movie => {
           if (filter === 'viewed') return movie.viewed;
@@ -147,8 +151,9 @@ export const ListWatchlist = () => {
         renderItem={renderMovie}
         keyExtractor={item => item.id.toString()}
         numColumns={2}
-        contentContainerStyle={tw`p-4`}
+        contentContainerStyle={tw`px-4 pt-2 pb-6`}
         columnWrapperStyle={tw`justify-between`}
+        ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl

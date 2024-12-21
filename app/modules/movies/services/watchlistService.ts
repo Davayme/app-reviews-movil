@@ -75,3 +75,31 @@ export const getUserWatchlist = async (userId: number): Promise<IWatchlistRespon
     throw error;
   }
 };
+
+export interface UpdateViewedStatusDto {
+  userId: number;
+  movieId: number;
+  viewed: boolean;
+}
+
+export const updateMovieViewedStatus = async (data: UpdateViewedStatusDto): Promise<any> => {
+  try {
+    const response = await fetch(`${API_URL}/watchlist/viewed-status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Error al actualizar estado de película');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error en updateMovieViewedStatus:', error);
+    throw error;
+  }
+};
