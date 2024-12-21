@@ -63,11 +63,10 @@ export const CarouselMovies: React.FC<CarouselMoviesProps> = ({
       const data = await fetchMovies(userId, nextPage);
 
       if (data.results.length > 0) {
-        // Usar una función para actualizar el estado para evitar cierres anticipados
         setMovies(prev => {
           const newMovies = data.results.map((movie: Movie) => ({
             ...movie,
-            inWatchlist: watchlist.has(movie.id)
+            inWatchlist: movie.inWatchlist // Aseguramos que el estado se mantenga
           }));
           return [...prev, ...newMovies];
         });

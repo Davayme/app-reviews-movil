@@ -80,7 +80,6 @@ export const CardMovie: React.FC<CardMovieProps> = ({
     return new Date(date).toLocaleDateString("es-ES", options);
   };
 
-
   const renderRating = () => {
     if (!movie.vote_average) {
       return (

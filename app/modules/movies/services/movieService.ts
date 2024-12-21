@@ -13,6 +13,7 @@ export const getPopularMovies = async (userId: number, page: number = 1): Promis
       totalPages: data.total_pages,
       results: data.results.length
     });
+    console.log('Popular movies:', data.results); // Debug
     return data;
   } catch (error) {
     console.error('Error fetching movies:', error);
