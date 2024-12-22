@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { Stack } from "expo-router";
 import { DefaultTheme } from "@react-navigation/native";
 import { ToastProvider } from "./common/components/Toast/ToastProvider";
 import { HeaderRight } from "./common/components/Header/HeaderRight";
 import { AuthProvider } from "./modules/auth/context/AuthContext";
 import { HeaderTitle } from "./common/components/Header/HeaderTitle";
+import { SearchModal } from "./modules/movies/components/Search/SearchModal";
 
 const customTheme = {
   ...DefaultTheme,
@@ -15,9 +16,14 @@ const customTheme = {
 };
 
 export default function RootLayout() {
+  const [isSearchModalVisible, setIsSearchModalVisible] = useState(false);
   return (
     <AuthProvider>
       <ToastProvider>
+      <SearchModal
+          visible={isSearchModalVisible}
+          onClose={() => setIsSearchModalVisible(false)}
+        />
         <Stack
           screenOptions={{
             headerStyle: {
@@ -34,11 +40,11 @@ export default function RootLayout() {
             name="modules/auth/screens/LoginScreen"
             options={{ title: "Iniciar Sesión" }}
           />
-          <Stack.Screen
+                    <Stack.Screen
             name="modules/movies/screens/MainScreen"
             options={{
               headerTitle: () => <HeaderTitle />,
-              headerRight: () => <HeaderRight />,
+              headerRight: () => <HeaderRight onSearchPress={() => setIsSearchModalVisible(true)} />,
               headerBackVisible: false,
               headerLeft: () => null,
               headerStyle: {

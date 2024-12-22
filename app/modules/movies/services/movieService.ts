@@ -33,3 +33,30 @@ export const getNowPlayingMovies = async (userId: number, page: number = 1): Pro
     throw error;
   }
 };
+
+export const searchMovies = async (
+  query: string,
+  language: string = 'es-ES',
+  page: number = 1
+): Promise<any> => {
+  try {
+    const response = await fetch(
+      `${API_URL}/movies/search?query=${encodeURIComponent(query)}&language=${language}&page=${page}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Error searching movies');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
+};

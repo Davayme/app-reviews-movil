@@ -3,10 +3,14 @@ import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors } from '../../utils/constants';
 
-export const HeaderRight = () => {
+interface HeaderRightProps {
+  onSearchPress: () => void;
+}
+
+export const HeaderRight: React.FC<HeaderRightProps> = ({ onSearchPress }) => {
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.iconButton}>
+      <TouchableOpacity style={styles.iconButton} onPress={onSearchPress}>
         <MaterialIcons name="search" size={24} color={colors.yellow} />
       </TouchableOpacity>
       <TouchableOpacity style={styles.iconButton}>
