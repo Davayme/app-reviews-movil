@@ -4,6 +4,7 @@ import { DefaultTheme } from "@react-navigation/native";
 import { ToastProvider } from "./common/components/Toast/ToastProvider";
 import { HeaderRight } from "./common/components/Header/HeaderRight";
 import { AuthProvider } from "./modules/auth/context/AuthContext";
+import { HeaderTitle } from "./common/components/Header/HeaderTitle";
 
 const customTheme = {
   ...DefaultTheme,
@@ -36,7 +37,7 @@ export default function RootLayout() {
           <Stack.Screen
             name="modules/movies/screens/MainScreen"
             options={{
-              title: "Cine Score",
+              headerTitle: () => <HeaderTitle />,
               headerRight: () => <HeaderRight />,
               headerBackVisible: false,
               headerLeft: () => null,
