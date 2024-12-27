@@ -14,7 +14,7 @@ import { useAuth } from "@/app/modules/auth/hooks/useAuth";
 import tw from "tailwind-react-native-classnames";
 import { CardWatchlistMovie } from "./CardWatchlistMovie";
 import { useWatchlist } from "../../context/WatchlistContextGlobal";
-import { SortWatchlist } from './SortWatchlist';
+import { SortWatchlist } from "./SortWatchlist";
 
 export const ListWatchlist = () => {
   const { user } = useAuth();
@@ -23,11 +23,27 @@ export const ListWatchlist = () => {
   const [sortedMovies, setSortedMovies] = useState(movies);
 
   useEffect(() => {
-    setSortedMovies(movies);
+    if (currentSort.type && currentSort.order) {
+      const sorted = sortMovies(movies, currentSort.type, currentSort.order);
+      setSortedMovies(sorted);
+    } else {
+      setSortedMovies(movies);
+    }
   }, [movies]);
 
-  const handleSort = (type: 'title' | 'date', order: 'asc' | 'desc') => {
-    const sorted = [...movies].sort((a, b) => {
+  const [currentSort, setCurrentSort] = useState<{
+    type: "title" | "date" | null;
+    order: "asc" | "desc" | null;
+  }>({ type: null, order: null });
+
+  const handleSort = (type: "title" | "date", order: "asc" | "desc") => {
+    setCurrentSort({ type, order });
+    const sorted = sortMovies(movies, type, order);
+    setSortedMovies(sorted);
+  };
+
+  const sortMovies = (moviesToSort: any[], type: 'title' | 'date', order: 'asc' | 'desc') => {
+    return [...moviesToSort].sort((a, b) => {
       if (type === 'title') {
         return order === 'asc'
           ? a.movie.title.localeCompare(b.movie.title)
@@ -38,8 +54,8 @@ export const ListWatchlist = () => {
         return order === 'asc' ? dateA - dateB : dateB - dateA;
       }
     });
-    setSortedMovies(sorted);
   };
+
 
   useEffect(() => {
     silentlyRefetchWatchlist();
@@ -65,7 +81,10 @@ export const ListWatchlist = () => {
           No hay películas en tu watchlist
         </Text>
         <TouchableOpacity
-          style={[tw`mt-4 px-6 py-3 rounded-full`, { backgroundColor: colors.yellow }]}
+          style={[
+            tw`mt-4 px-6 py-3 rounded-full`,
+            { backgroundColor: colors.yellow },
+          ]}
           onPress={onRefresh}
         >
           <Text style={tw`font-bold`}>Actualizar</Text>
@@ -74,32 +93,34 @@ export const ListWatchlist = () => {
     );
   }
 
-  const FilterButton = ({ 
-    label, 
-    value, 
-    icon 
-  }: { 
-    label: string, 
-    value: "all" | "viewed" | "pending",
-    icon: string
+  const FilterButton = ({
+    label,
+    value,
+    icon,
+  }: {
+    label: string;
+    value: "all" | "viewed" | "pending";
+    icon: string;
   }) => (
     <TouchableOpacity
       style={[
         tw`px-4 py-2 rounded-full flex-row items-center`,
-        filter === value && { backgroundColor: colors.magenta }
+        filter === value && { backgroundColor: colors.magenta },
       ]}
       onPress={() => setFilter(value)}
     >
       <MaterialIcons
         name={icon as keyof typeof MaterialIcons.glyphMap}
         size={16}
-        color={filter === value ? '#fff' : colors.gris}
+        color={filter === value ? "#fff" : colors.gris}
         style={tw`mr-2`}
       />
-      <Text style={[
-        tw`font-medium`,
-        { color: filter === value ? '#fff' : colors.gris }
-      ]}>
+      <Text
+        style={[
+          tw`font-medium`,
+          { color: filter === value ? "#fff" : colors.gris },
+        ]}
+      >
         {label}
       </Text>
     </TouchableOpacity>
@@ -107,26 +128,26 @@ export const ListWatchlist = () => {
 
   return (
     <View style={[tw`flex-1`, { backgroundColor: colors["background-color"] }]}>
-      <StatusBar backgroundColor={colors["background-color"]} barStyle="light-content" />
-      
+      <StatusBar
+        backgroundColor={colors["background-color"]}
+        barStyle="light-content"
+      />
+
       <View style={tw`px-4 py-6`}>
         <View style={tw`flex-row items-center`}>
-          <View style={[tw`flex-row rounded-full p-1`, { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
-            <FilterButton
-              label="Todas"
-              value="all"
-              icon="local-movies"
-            />
+          <View
+            style={[
+              tw`flex-row rounded-full p-1`,
+              { backgroundColor: "rgba(255,255,255,0.1)" },
+            ]}
+          >
+            <FilterButton label="Todas" value="all" icon="local-movies" />
             <FilterButton
               label="Pendientes"
               value="pending"
               icon="watch-later"
             />
-            <FilterButton
-              label="Vistas"
-              value="viewed"
-              icon="done-all"
-            />
+            <FilterButton label="Vistas" value="viewed" icon="done-all" />
           </View>
           <View style={tw`ml-2`}>
             <SortWatchlist onSort={handleSort} />
@@ -135,19 +156,19 @@ export const ListWatchlist = () => {
       </View>
 
       <FlatList
-        data={sortedMovies.filter(movie => {
-          if (filter === 'viewed') return movie.viewed;
-          if (filter === 'pending') return !movie.viewed;
+        data={sortedMovies.filter((movie) => {
+          if (filter === "viewed") return movie.viewed;
+          if (filter === "pending") return !movie.viewed;
           return true;
         })}
         renderItem={({ item, index }) => (
-          <CardWatchlistMovie 
-            item={item} 
+          <CardWatchlistMovie
+            item={item}
             index={index}
             userId={user?.id || 0}
           />
         )}
-        keyExtractor={item => item.id.toString()}
+        keyExtractor={(item) => item.id.toString()}
         numColumns={2}
         contentContainerStyle={tw`px-4 pt-2 pb-6`}
         columnWrapperStyle={tw`justify-between`}
