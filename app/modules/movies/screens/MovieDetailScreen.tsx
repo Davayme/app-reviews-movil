@@ -6,7 +6,7 @@ import { useRoute } from '@react-navigation/native';
 import { colors } from '@/app/common/utils/constants';
 import tw from 'tailwind-react-native-classnames';
 
-export const MovieDetailScreen: React.FC = () => {
+const MovieDetailScreen: React.FC = () => {
   const route = useRoute();
   const { id, userId } = route.params as { id: number; userId: number };
   const [movie, setMovie] = useState(null);
@@ -49,3 +49,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors['background-color'],
   },
 });
+
+export default MovieDetailScreen;

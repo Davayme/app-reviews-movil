@@ -9,6 +9,7 @@ import {
   Modal,
   Pressable,
 } from "react-native";
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { Movie } from "@/app/common/interfaces/IMovie";
 import { MaterialIcons } from "@expo/vector-icons";
 import { colors } from "@/app/common/utils/constants";
@@ -21,6 +22,7 @@ import {
   removeFromWatchlist,
 } from "../../services/watchlistService";
 import { useWatchlist } from "../../context/WatchlistContextGlobal";
+import { RootStackParamList } from "../../context/RootStack"; // Importar los tipos de las rutas
 
 const { width } = Dimensions.get("window");
 const ITEM_WIDTH = width * 0.4;
@@ -40,6 +42,7 @@ export const CardMovie: React.FC<CardMovieProps> = ({
   const [showModal, setShowModal] = useState(false);
   const [inWatchlist, setInWatchlist] = useState(movie.inWatchlist);
   const { silentlyRefetchWatchlist } = useWatchlist();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   const handleWatchlistToggle = async () => {
     if (!user) {
@@ -216,7 +219,13 @@ export const CardMovie: React.FC<CardMovieProps> = ({
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.modalButton}>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => {
+                setShowModal(false);
+                navigation.navigate('modules/movies/screens/MovieDetailScreen', { id: movie.id, userId: user?.id });
+              }}
+            >
               <MaterialIcons name="info" size={24} color="#fff" />
               <Text style={styles.modalButtonText}>Ver detalles</Text>
             </TouchableOpacity>

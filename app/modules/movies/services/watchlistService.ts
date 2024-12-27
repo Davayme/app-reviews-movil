@@ -63,13 +63,13 @@ export const getUserWatchlist = async (userId: number): Promise<IWatchlistRespon
         },
       }
     );
-
+    
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || 'Error al obtener el watchlist');
     }
-
-    return await response.json();
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error('Error en getUserWatchlist:', error);
     throw error;

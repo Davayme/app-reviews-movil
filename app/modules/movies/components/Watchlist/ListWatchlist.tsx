@@ -14,11 +14,32 @@ import { useAuth } from "@/app/modules/auth/hooks/useAuth";
 import tw from "tailwind-react-native-classnames";
 import { CardWatchlistMovie } from "./CardWatchlistMovie";
 import { useWatchlist } from "../../context/WatchlistContextGlobal";
+import { SortWatchlist } from './SortWatchlist';
 
 export const ListWatchlist = () => {
   const { user } = useAuth();
   const { movies, isRefetching, silentlyRefetchWatchlist } = useWatchlist();
   const [filter, setFilter] = useState<"all" | "viewed" | "pending">("all");
+  const [sortedMovies, setSortedMovies] = useState(movies);
+
+  useEffect(() => {
+    setSortedMovies(movies);
+  }, [movies]);
+
+  const handleSort = (type: 'title' | 'date', order: 'asc' | 'desc') => {
+    const sorted = [...movies].sort((a, b) => {
+      if (type === 'title') {
+        return order === 'asc'
+          ? a.movie.title.localeCompare(b.movie.title)
+          : b.movie.title.localeCompare(a.movie.title);
+      } else {
+        const dateA = new Date(a.movie.createdAt).getTime();
+        const dateB = new Date(b.movie.createdAt).getTime();
+        return order === 'asc' ? dateA - dateB : dateB - dateA;
+      }
+    });
+    setSortedMovies(sorted);
+  };
 
   useEffect(() => {
     silentlyRefetchWatchlist();
@@ -88,28 +109,33 @@ export const ListWatchlist = () => {
     <View style={[tw`flex-1`, { backgroundColor: colors["background-color"] }]}>
       <StatusBar backgroundColor={colors["background-color"]} barStyle="light-content" />
       
-      <View style={tw`flex-row justify-center py-6`}>
-        <View style={[tw`flex-row rounded-full p-1`, { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
-          <FilterButton
-            label="Todas"
-            value="all"
-            icon="local-movies"
-          />
-          <FilterButton
-            label="Pendientes"
-            value="pending"
-            icon="watch-later"
-          />
-          <FilterButton
-            label="Vistas"
-            value="viewed"
-            icon="done-all"
-          />
+      <View style={tw`px-4 py-6`}>
+        <View style={tw`flex-row items-center`}>
+          <View style={[tw`flex-row rounded-full p-1`, { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
+            <FilterButton
+              label="Todas"
+              value="all"
+              icon="local-movies"
+            />
+            <FilterButton
+              label="Pendientes"
+              value="pending"
+              icon="watch-later"
+            />
+            <FilterButton
+              label="Vistas"
+              value="viewed"
+              icon="done-all"
+            />
+          </View>
+          <View style={tw`ml-2`}>
+            <SortWatchlist onSort={handleSort} />
+          </View>
         </View>
       </View>
 
       <FlatList
-        data={movies.filter(movie => {
+        data={sortedMovies.filter(movie => {
           if (filter === 'viewed') return movie.viewed;
           if (filter === 'pending') return !movie.viewed;
           return true;

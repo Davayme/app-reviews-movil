@@ -66,11 +66,11 @@ export default function RootLayout() {
               name="modules/auth/screens/RegisterScreen"
               options={{ title: "Regístrate" }}
             />
-          </Stack>
-          <Stack.Screen
+            <Stack.Screen
               name="modules/movies/screens/MovieDetailScreen"
               options={{ headerShown: false }}
             />
+          </Stack>
         </WatchlistProvider>
       </AuthProvider>
     </ToastProvider>
