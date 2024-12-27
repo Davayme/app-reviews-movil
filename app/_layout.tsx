@@ -67,6 +67,10 @@ export default function RootLayout() {
               options={{ title: "Regístrate" }}
             />
           </Stack>
+          <Stack.Screen
+              name="modules/movies/screens/MovieDetailScreen"
+              options={{ headerShown: false }}
+            />
         </WatchlistProvider>
       </AuthProvider>
     </ToastProvider>

@@ -15,6 +15,7 @@ import { colors } from '@/app/common/utils/constants';
 import tw from 'tailwind-react-native-classnames';
 import { IWatchlistItem } from '@/app/common/interfaces/IWatchlist';
 import { updateMovieViewedStatus } from '../../services/watchlistService';
+import { useWatchlist } from '../../context/WatchlistContextGlobal';
 
 const { width } = Dimensions.get('window');
 const COLUMN_WIDTH = (width - 82) / 2; // Aumentamos el espacio entre columnas
@@ -33,7 +34,7 @@ export const CardWatchlistMovie: React.FC<CardWatchlistMovieProps> = ({
   onToggleViewed,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [viewed, setViewed] = useState(item.viewed);
+  const { silentlyRefetchWatchlist } = useWatchlist();
 
   const handleToggleViewed = async () => {
     try {
@@ -41,10 +42,10 @@ export const CardWatchlistMovie: React.FC<CardWatchlistMovieProps> = ({
       await updateMovieViewedStatus({
         userId,
         movieId: item.movieId,
-        viewed: !viewed
+        viewed: !item.viewed
       });
-      setViewed(!viewed);
-      onToggleViewed?.(item.id, !viewed);
+      onToggleViewed?.(item.id, !item.viewed);
+      await silentlyRefetchWatchlist(); // Refrescar la watchlist después del cambio
     } catch (error) {
       console.error('Error toggling viewed status:', error);
     } finally {
@@ -78,7 +79,7 @@ export const CardWatchlistMovie: React.FC<CardWatchlistMovieProps> = ({
             <TouchableOpacity
               style={[
                 styles.viewedButton, 
-                viewed && styles.viewedButtonActive,
+                item.viewed && styles.viewedButtonActive,
                 isLoading && styles.viewedButtonDisabled
               ]}
               onPress={handleToggleViewed}
@@ -89,13 +90,13 @@ export const CardWatchlistMovie: React.FC<CardWatchlistMovieProps> = ({
               ) : (
                 <>
                   <MaterialIcons
-                    name={viewed ? 'check-circle' : 'remove-red-eye'}
+                    name={item.viewed ? 'check-circle' : 'remove-red-eye'}
                     size={18}
-                    color={viewed ? colors.yellow : colors.gris}
+                    color={item.viewed ? colors.yellow : colors.gris}
                     style={styles.viewedIcon}
                   />
-                  <Text style={[styles.viewedText, viewed && styles.viewedTextActive]}>
-                    {viewed ? 'Vista' : 'Por ver'}
+                  <Text style={[styles.viewedText, item.viewed && styles.viewedTextActive]}>
+                    {item.viewed ? 'Vista' : 'Por ver'}
                   </Text>
                 </>
               )}
