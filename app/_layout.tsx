@@ -6,6 +6,7 @@ import { HeaderRight } from "./common/components/Header/HeaderRight";
 import { AuthProvider } from "./modules/auth/context/AuthContext";
 import { HeaderTitle } from "./common/components/Header/HeaderTitle";
 import { SearchModal } from "./modules/movies/components/Search/SearchModal";
+import { WatchlistProvider } from "./modules/movies/context/WatchlistContextGlobal";
 
 const customTheme = {
   ...DefaultTheme,
@@ -18,35 +19,15 @@ const customTheme = {
 export default function RootLayout() {
   const [isSearchModalVisible, setIsSearchModalVisible] = useState(false);
   return (
-    <AuthProvider>
-      <ToastProvider>
-      <SearchModal
-          visible={isSearchModalVisible}
-          onClose={() => setIsSearchModalVisible(false)}
-        />
-        <Stack
-          screenOptions={{
-            headerStyle: {
-              backgroundColor: "#1b1b1b",
-            },
-            headerTintColor: "#ffffff",
-            headerTitleStyle: {
-              fontWeight: "bold",
-            },
-          }}
-        >
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="modules/auth/screens/LoginScreen"
-            options={{ title: "Iniciar Sesión" }}
+    <ToastProvider>
+      <AuthProvider>
+        <WatchlistProvider>
+          <SearchModal
+            visible={isSearchModalVisible}
+            onClose={() => setIsSearchModalVisible(false)}
           />
-                    <Stack.Screen
-            name="modules/movies/screens/MainScreen"
-            options={{
-              headerTitle: () => <HeaderTitle />,
-              headerRight: () => <HeaderRight onSearchPress={() => setIsSearchModalVisible(true)} />,
-              headerBackVisible: false,
-              headerLeft: () => null,
+          <Stack
+            screenOptions={{
               headerStyle: {
                 backgroundColor: "#1b1b1b",
               },
@@ -55,13 +36,39 @@ export default function RootLayout() {
                 fontWeight: "bold",
               },
             }}
-          />
-          <Stack.Screen
-            name="modules/auth/screens/RegisterScreen"
-            options={{ title: "Regístrate" }}
-          />
-        </Stack>
-      </ToastProvider>
-    </AuthProvider>
+          >
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="modules/auth/screens/LoginScreen"
+              options={{ title: "Iniciar Sesión" }}
+            />
+            <Stack.Screen
+              name="modules/movies/screens/MainScreen"
+              options={{
+                headerTitle: () => <HeaderTitle />,
+                headerRight: () => (
+                  <HeaderRight
+                    onSearchPress={() => setIsSearchModalVisible(true)}
+                  />
+                ),
+                headerBackVisible: false,
+                headerLeft: () => null,
+                headerStyle: {
+                  backgroundColor: "#1b1b1b",
+                },
+                headerTintColor: "#ffffff",
+                headerTitleStyle: {
+                  fontWeight: "bold",
+                },
+              }}
+            />
+            <Stack.Screen
+              name="modules/auth/screens/RegisterScreen"
+              options={{ title: "Regístrate" }}
+            />
+          </Stack>
+        </WatchlistProvider>
+      </AuthProvider>
+    </ToastProvider>
   );
 }

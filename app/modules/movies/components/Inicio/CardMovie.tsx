@@ -20,7 +20,7 @@ import {
   addToWatchlist,
   removeFromWatchlist,
 } from "../../services/watchlistService";
-import { useWatchlist } from "../../context/WatchlistContext";
+import { useWatchlist } from "../../context/WatchlistContextGlobal";
 
 const { width } = Dimensions.get("window");
 const ITEM_WIDTH = width * 0.4;
@@ -39,6 +39,7 @@ export const CardMovie: React.FC<CardMovieProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [inWatchlist, setInWatchlist] = useState(movie.inWatchlist);
+  const { silentlyRefetchWatchlist } = useWatchlist();
 
   const handleWatchlistToggle = async () => {
     if (!user) {
@@ -46,9 +47,13 @@ export const CardMovie: React.FC<CardMovieProps> = ({
       return;
     }
 
+    // Estado local optimista
+    const previousState = inWatchlist;
+    setInWatchlist(!inWatchlist);
+
     try {
       setIsLoading(true);
-      if (inWatchlist) {
+      if (previousState) {
         await removeFromWatchlist(user.id, movie.id);
         showToast("Película eliminada de tu watchlist", "success");
       } else {
@@ -61,9 +66,15 @@ export const CardMovie: React.FC<CardMovieProps> = ({
         });
         showToast("Película agregada a tu watchlist", "success");
       }
-      setInWatchlist(!inWatchlist);
-      onWatchlistChange?.(movie.id, !inWatchlist);
+      
+      // Actualizar silenciosamente la watchlist
+      await silentlyRefetchWatchlist();
+      
+      // Notificar al padre si es necesario
+      onWatchlistChange?.(movie.id, !previousState);
     } catch (error) {
+      // Revertir en caso de error
+      setInWatchlist(previousState);
       showToast("Ocurrió un error. Intenta nuevamente", "error");
     } finally {
       setIsLoading(false);

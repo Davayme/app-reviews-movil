@@ -33,6 +33,7 @@ export const CardWatchlistMovie: React.FC<CardWatchlistMovieProps> = ({
   onToggleViewed,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [viewed, setViewed] = useState(item.viewed);
 
   const handleToggleViewed = async () => {
     try {
@@ -40,9 +41,10 @@ export const CardWatchlistMovie: React.FC<CardWatchlistMovieProps> = ({
       await updateMovieViewedStatus({
         userId,
         movieId: item.movieId,
-        viewed: !item.viewed
+        viewed: !viewed
       });
-      onToggleViewed?.(item.id, !item.viewed);
+      setViewed(!viewed);
+      onToggleViewed?.(item.id, !viewed);
     } catch (error) {
       console.error('Error toggling viewed status:', error);
     } finally {
@@ -76,7 +78,7 @@ export const CardWatchlistMovie: React.FC<CardWatchlistMovieProps> = ({
             <TouchableOpacity
               style={[
                 styles.viewedButton, 
-                item.viewed && styles.viewedButtonActive,
+                viewed && styles.viewedButtonActive,
                 isLoading && styles.viewedButtonDisabled
               ]}
               onPress={handleToggleViewed}
@@ -87,13 +89,13 @@ export const CardWatchlistMovie: React.FC<CardWatchlistMovieProps> = ({
               ) : (
                 <>
                   <MaterialIcons
-                    name={item.viewed ? 'check-circle' : 'remove-red-eye'}
+                    name={viewed ? 'check-circle' : 'remove-red-eye'}
                     size={18}
-                    color={item.viewed ? colors.yellow : colors.gris}
+                    color={viewed ? colors.yellow : colors.gris}
                     style={styles.viewedIcon}
                   />
-                  <Text style={[styles.viewedText, item.viewed && styles.viewedTextActive]}>
-                    {item.viewed ? 'Vista' : 'Por ver'}
+                  <Text style={[styles.viewedText, viewed && styles.viewedTextActive]}>
+                    {viewed ? 'Vista' : 'Por ver'}
                   </Text>
                 </>
               )}

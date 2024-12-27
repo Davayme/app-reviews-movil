@@ -9,60 +9,26 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { getUserWatchlist } from "../../services/watchlistService";
 import { colors } from "@/app/common/utils/constants";
-import { IWatchlistItem } from "@/app/common/interfaces/IWatchlist";
 import { useAuth } from "@/app/modules/auth/hooks/useAuth";
 import tw from "tailwind-react-native-classnames";
 import { CardWatchlistMovie } from "./CardWatchlistMovie";
+import { useWatchlist } from "../../context/WatchlistContextGlobal";
 
 export const ListWatchlist = () => {
   const { user } = useAuth();
-  const [movies, setMovies] = useState<IWatchlistItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const { movies, isRefetching, silentlyRefetchWatchlist } = useWatchlist();
   const [filter, setFilter] = useState<"all" | "viewed" | "pending">("all");
 
-  const loadWatchlist = async () => {
-    try {
-      setIsLoading(true);
-      const response = await getUserWatchlist(user?.id || 0);
-      setMovies(response.data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    loadWatchlist();
-  }, []);
+    silentlyRefetchWatchlist();
+  }, [silentlyRefetchWatchlist]);
 
   const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await loadWatchlist();
-    setRefreshing(false);
-  }, []);
+    await silentlyRefetchWatchlist();
+  }, [silentlyRefetchWatchlist]);
 
-  const handleToggleViewed = (id: number, viewed: boolean) => {
-    setMovies(prevMovies =>
-      prevMovies.map(movie =>
-        movie.id === id ? { ...movie, viewed } : movie
-      )
-    );
-  };
-
-  const renderMovie = ({ item, index }: { item: IWatchlistItem; index: number }) => (
-    <CardWatchlistMovie 
-      item={item} 
-      index={index}
-      userId={user?.id || 0}
-      onToggleViewed={handleToggleViewed}
-    />
-  );
-
-  if (isLoading) {
+  if (isRefetching && movies.length === 0) {
     return (
       <View style={tw`flex-1 justify-center items-center`}>
         <ActivityIndicator size="large" color={colors.yellow} />
@@ -148,7 +114,13 @@ export const ListWatchlist = () => {
           if (filter === 'pending') return !movie.viewed;
           return true;
         })}
-        renderItem={renderMovie}
+        renderItem={({ item, index }) => (
+          <CardWatchlistMovie 
+            item={item} 
+            index={index}
+            userId={user?.id || 0}
+          />
+        )}
         keyExtractor={item => item.id.toString()}
         numColumns={2}
         contentContainerStyle={tw`px-4 pt-2 pb-6`}
@@ -157,7 +129,7 @@ export const ListWatchlist = () => {
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
+            refreshing={isRefetching}
             onRefresh={onRefresh}
             tintColor={colors.yellow}
           />

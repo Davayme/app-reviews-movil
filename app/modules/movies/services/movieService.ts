@@ -60,3 +60,23 @@ export const searchMovies = async (
     throw error;
   }
 };
+
+export const getDetailMovie = async (id: number, userId: number, language: string = 'es-ES') => {
+  try {
+    const response = await fetch(`${API_URL}/detail-movie/${id}?userId=${userId}&language=${language}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Error fetching movie details');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error:', error);
+    throw error;
+  }
+};
