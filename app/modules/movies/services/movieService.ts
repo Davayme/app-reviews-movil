@@ -63,7 +63,7 @@ export const searchMovies = async (
 
 export const getDetailMovie = async (id: number, userId: number, language: string = 'es-ES') => {
   try {
-    const response = await fetch(`${API_URL}/detail-movie/${id}?userId=${userId}&language=${language}`, {
+    const response = await fetch(`${API_URL}/movies/detail-movie/${id}?userId=${userId}&language=${language}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -73,8 +73,9 @@ export const getDetailMovie = async (id: number, userId: number, language: strin
     if (!response.ok) {
       throw new Error('Error fetching movie details');
     }
-
-    return await response.json();
+    const data = await response.json();
+    /* console.log('Movie details:', data); */ // Debug
+    return data;
   } catch (error) {
     console.error('Error:', error);
     throw error;
