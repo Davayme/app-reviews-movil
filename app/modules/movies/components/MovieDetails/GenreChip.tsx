@@ -27,12 +27,25 @@ const genreStyles: { [key: number]: { color: string; emoji: string } } = {
   37: { color: '#A52A2A', emoji: '🤠' }, // Western
 };
 
+const getTextColor = (backgroundColor: string) => {
+  // Convert hex color to RGB
+  const rgb = parseInt(backgroundColor.slice(1), 16);
+  const r = (rgb >> 16) & 0xff;
+  const g = (rgb >>  8) & 0xff;
+  const b = (rgb >>  0) & 0xff;
+
+  // Calculate brightness (YIQ formula)
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness > 128 ? 'black' : 'white';
+};
+
 export const GenreChip: React.FC<GenreChipProps> = ({ genre }) => {
   const { color, emoji } = genreStyles[genre.id] || { color: '#FFF', emoji: '🎬' };
+  const textColor = getTextColor(color);
 
   return (
     <View style={[styles.chip, { backgroundColor: color }]}>
-      <Text style={styles.chipText}>{emoji} {genre.name}</Text>
+      <Text style={[styles.chipText, { color: textColor }]}>{emoji} {genre.name}</Text>
     </View>
   );
 };
@@ -46,7 +59,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   chipText: {
-    color: 'white',
     fontSize: 13,
     fontWeight: '500',
   },

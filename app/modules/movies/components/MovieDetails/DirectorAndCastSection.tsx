@@ -57,7 +57,7 @@ export const DirectorAndCastSection: React.FC<CastCrewSectionProps> = ({ cast, d
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Feather name="user" size={16} color="#CCC" />
-          <Text style={styles.sectionTitle}>DIRECTORES</Text>
+          <Text style={styles.sectionTitle}>Directores</Text>
         </View>
         {directors.length > 0 ? (
           <ScrollView 
@@ -76,7 +76,7 @@ export const DirectorAndCastSection: React.FC<CastCrewSectionProps> = ({ cast, d
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Feather name="users" size={16} color="#CCC" />
-          <Text style={styles.sectionTitle}>REPARTO</Text>
+          <Text style={styles.sectionTitle}>Reparto</Text>
         </View>
         {cast.length > 0 ? (
           <ScrollView 

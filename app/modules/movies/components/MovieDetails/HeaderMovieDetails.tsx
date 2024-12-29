@@ -13,6 +13,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons, Ionicons, FontAwesome5, Feather } from '@expo/vector-icons';
 import { colors } from '@/app/common/utils/constants';
 import tw from 'tailwind-react-native-classnames';
+import { GenreChip } from './GenreChip';
 
 const { width, height } = Dimensions.get('window');
 
@@ -169,9 +170,7 @@ export const HeaderMovieDetails: React.FC<HeaderMovieDetailsProps> = ({ movie })
           </View>
           <View style={styles.genresContainer}>
             {movie.genres.map((genre) => (
-              <View key={genre.id} style={styles.genreChip}>
-                <Text style={styles.genreText}>{genre.name}</Text>
-              </View>
+              <GenreChip key={genre.id} genre={genre} />
             ))}
           </View>
         </View>
@@ -317,16 +316,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-  },
-  genreChip: {
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  genreText: {
-    color: 'white',
-    fontSize: 13,
-    fontWeight: '500',
   },
 });
