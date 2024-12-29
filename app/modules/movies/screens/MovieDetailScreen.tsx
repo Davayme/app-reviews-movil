@@ -1,21 +1,52 @@
 import React, { useEffect, useState } from 'react';
-import { View, ScrollView, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { HeaderMovieDetails } from '../components/MovieDetails/HeaderMovieDetails';
 import { getDetailMovie } from '../services/movieService';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { RouteProp, useRoute } from '@react-navigation/native';
 import { colors } from '@/app/common/utils/constants';
 import tw from 'tailwind-react-native-classnames';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useRouter } from "expo-router";
 import { CustomLoading } from '@/app/common/components/Loading/CustomLoading';
+import { DirectorAndCastSection } from '../components/MovieDetails/DirectorAndCastSection';
+
+type RootStackParamList = {
+  MovieDetailScreen: { id: number; userId: number };
+};
+
+type MovieDetailScreenRouteProp = RouteProp<RootStackParamList, 'MovieDetailScreen'>;
+
+interface Person {
+  id: number;
+  name: string;
+  profile_path: string;
+}
+
+interface Movie {
+  id: number;
+  title: string;
+  tagline: string;
+  genres: { id: number; name: string }[];
+  vote_average: number;
+  release_date: string;
+  img: string;
+  poster_path: string;
+  runtime: number;
+  score: number | null;
+  inWatchlist: boolean;
+  viewed: boolean;
+  overview: string;
+  cast: Person[];
+  directors: Person[];
+}
 
 const MovieDetailScreen: React.FC = () => {
-  const route = useRoute();
-  const navigation = useNavigation();
-  const { id, userId } = route.params as { id: number; userId: number };
-  const [movie, setMovie] = useState(null);
+  const route = useRoute<MovieDetailScreenRouteProp>();
+  const { id, userId } = route.params;
+  const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+
   useEffect(() => {
     const fetchMovieDetails = async () => {
       try {
@@ -42,7 +73,7 @@ const MovieDetailScreen: React.FC = () => {
       </TouchableOpacity>
       <ScrollView style={tw`flex-1 bg-black`}>
         {movie && <HeaderMovieDetails movie={movie} />}
-        
+        {movie && <DirectorAndCastSection cast={movie.cast} directors={movie.directors} />}
       </ScrollView>
     </View>
   );
@@ -51,9 +82,6 @@ const MovieDetailScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors['background-color'],
-  },
-  loadingContainer: {
     backgroundColor: colors['background-color'],
   },
   backButton: {

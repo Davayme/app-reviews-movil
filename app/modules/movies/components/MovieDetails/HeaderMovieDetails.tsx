@@ -87,7 +87,7 @@ export const HeaderMovieDetails: React.FC<HeaderMovieDetailsProps> = ({ movie })
   };
 
   return (
-    <ScrollView style={styles.container} bounces={false}>
+    <View style={styles.container}>
       <ImageBackground
         source={{ uri: `https://image.tmdb.org/t/p/original${movie.img}` }}
         style={styles.backgroundImage}
@@ -156,26 +156,27 @@ export const HeaderMovieDetails: React.FC<HeaderMovieDetailsProps> = ({ movie })
                 <Text style={styles.tagline}>"{movie.tagline}"</Text>
               </View>
             )}
-
-            <ExpandableOverview text={movie.overview} />
-
-            <View style={styles.genresSection}>
-              <View style={styles.sectionHeader}>
-                <Feather name="tag" size={16} color="#CCC" />
-                <Text style={styles.sectionTitle}>Géneros</Text>
-              </View>
-              <View style={styles.genresContainer}>
-                {movie.genres.map((genre) => (
-                  <View key={genre.id} style={styles.genreChip}>
-                    <Text style={styles.genreText}>{genre.name}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
           </View>
         </LinearGradient>
       </ImageBackground>
-    </ScrollView>
+      <ScrollView style={styles.overviewScroll}>
+        <ExpandableOverview text={movie.overview} />
+
+        <View style={styles.genresSection}>
+          <View style={styles.sectionHeader}>
+            <Feather name="tag" size={16} color="#CCC" />
+            <Text style={styles.sectionTitle}>Géneros</Text>
+          </View>
+          <View style={styles.genresContainer}>
+            {movie.genres.map((genre) => (
+              <View key={genre.id} style={styles.genreChip}>
+                <Text style={styles.genreText}>{genre.name}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -186,7 +187,7 @@ const styles = StyleSheet.create({
   },
   backgroundImage: {
     width,
-    height: height * 0.7,
+    height: height * 0.5,
   },
   gradient: {
     flex: 1,
@@ -195,7 +196,7 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 16,
     paddingBottom: 20,
-    paddingTop: 40, // Ajustar el espaciado superior
+    paddingTop: 20, // Ajustar el espaciado superior
   },
   headerSection: {
     flexDirection: 'row',
@@ -274,6 +275,11 @@ const styles = StyleSheet.create({
     color: '#CCC',
     fontStyle: 'italic',
     marginLeft: 8,
+  },
+  overviewScroll: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 20,
   },
   overviewContainer: {
     marginBottom: 20,

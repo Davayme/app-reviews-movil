@@ -74,7 +74,7 @@ export const getDetailMovie = async (id: number, userId: number, language: strin
       throw new Error('Error fetching movie details');
     }
     const data = await response.json();
-    /* console.log('Movie details:', data); */ // Debug
+     console.log('Movie details:', data); 
     return data;
   } catch (error) {
     console.error('Error:', error);
