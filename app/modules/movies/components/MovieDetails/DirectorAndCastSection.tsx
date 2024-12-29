@@ -5,11 +5,8 @@ import {
   StyleSheet, 
   ScrollView, 
   Image, 
-  Dimensions,
-  TouchableOpacity 
+  Dimensions
 } from 'react-native';
-import { colors } from '@/app/common/utils/constants';
-import tw from 'tailwind-react-native-classnames';
 import { Feather } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');

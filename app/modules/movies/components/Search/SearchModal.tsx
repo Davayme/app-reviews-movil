@@ -8,14 +8,15 @@ import {
   Image,
   Modal,
   ActivityIndicator,
-  Dimensions,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import tw from "tailwind-react-native-classnames";
 import { colors } from "@/app/common/utils/constants";
 import { searchMovies } from "../../services/movieService";
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { RootStackParamList } from "../../context/RootStack";
+import { useAuth } from "@/app/modules/auth/hooks/useAuth";
 
-const { width } = Dimensions.get("window");
 const ITEM_HEIGHT = 140;
 
 interface SearchModalProps {
@@ -47,6 +48,8 @@ export const SearchModal: React.FC<SearchModalProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const { user } = useAuth();
 
   const handleSearch = async () => {
     if (!query.trim()) return;
@@ -187,6 +190,10 @@ export const SearchModal: React.FC<SearchModalProps> = ({
               tw`px-4 py-2 rounded-full`,
               { backgroundColor: colors.magenta },
             ]}
+            onPress={() => {
+              onClose();
+              navigation.navigate('modules/movies/screens/MovieDetailScreen', { id: item.id, userId: user?.id });
+            }}
           >
             <Text style={tw`text-white font-medium text-xs`}>Ver más</Text>
           </TouchableOpacity>

@@ -16,9 +16,13 @@ import tw from 'tailwind-react-native-classnames';
 import { IWatchlistItem } from '@/app/common/interfaces/IWatchlist';
 import { updateMovieViewedStatus } from '../../services/watchlistService';
 import { useWatchlist } from '../../context/WatchlistContextGlobal';
+import { useAuth } from "@/app/modules/auth/hooks/useAuth";
+import { RootStackParamList } from "../../context/RootStack";
+import { useNavigation } from 'expo-router';
+import { NavigationProp } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
-const COLUMN_WIDTH = (width - 82) / 2; // Aumentamos el espacio entre columnas
+const COLUMN_WIDTH = (width - 82) / 2; 
 
 interface CardWatchlistMovieProps {
   item: IWatchlistItem;
@@ -35,6 +39,8 @@ export const CardWatchlistMovie: React.FC<CardWatchlistMovieProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { silentlyRefetchWatchlist } = useWatchlist();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const { user } = useAuth();
 
   const handleToggleViewed = async () => {
     try {
@@ -45,7 +51,7 @@ export const CardWatchlistMovie: React.FC<CardWatchlistMovieProps> = ({
         viewed: !item.viewed
       });
       onToggleViewed?.(item.id, !item.viewed);
-      await silentlyRefetchWatchlist(); // Refrescar la watchlist después del cambio
+      await silentlyRefetchWatchlist();
     } catch (error) {
       console.error('Error toggling viewed status:', error);
     } finally {
@@ -61,6 +67,9 @@ export const CardWatchlistMovie: React.FC<CardWatchlistMovieProps> = ({
       <TouchableOpacity
         style={styles.container}
         activeOpacity={0.8}
+        onPress={() => {
+          navigation.navigate('modules/movies/screens/MovieDetailScreen', { id: item.movie.id, userId: user?.id });
+        }}
       >
         <Image
           source={{ uri: `https://image.tmdb.org/t/p/w500${item.movie.posterPath}` }}
