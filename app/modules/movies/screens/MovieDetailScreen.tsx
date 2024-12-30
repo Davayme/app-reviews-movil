@@ -9,6 +9,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useRouter } from "expo-router";
 import { CustomLoading } from '@/app/common/components/Loading/CustomLoading';
 import { DirectorAndCastSection } from '../components/MovieDetails/DirectorAndCastSection';
+import ReviewModal from '../components/MovieDetails/ReviewModal';
+import * as Animatable from 'react-native-animatable';
 
 type RootStackParamList = {
   MovieDetailScreen: { id: number; userId: number };
@@ -45,6 +47,7 @@ const MovieDetailScreen: React.FC = () => {
   const { id, userId } = route.params;
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isReviewModalVisible, setReviewModalVisible] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -75,6 +78,39 @@ const MovieDetailScreen: React.FC = () => {
         {movie && <HeaderMovieDetails movie={movie} />}
         {movie && <DirectorAndCastSection cast={movie.cast} directors={movie.directors} />}
       </ScrollView>
+      <Animatable.View
+        animation="pulse"
+        easing="ease-out"
+        iterationCount="infinite"
+        duration={2000}
+        style={styles.floatingButtonContainer}
+      >
+        <TouchableOpacity
+          style={styles.floatingButton}
+          onPress={() => setReviewModalVisible(true)}
+        >
+          <Icon name="create-outline" size={24} color="#fff" />
+        </TouchableOpacity>
+      </Animatable.View>
+      {movie && (
+        <ReviewModal
+          isVisible={isReviewModalVisible}
+          onClose={() => setReviewModalVisible(false)}
+          isInWatchlist={movie.inWatchlist}
+          isWatched={movie.viewed}
+          onWatchlistToggle={() => {
+            // Lógica para agregar o quitar de la watchlist
+          }}
+          onWatchedToggle={() => {
+            // Lógica para marcar como vista o no vista
+          }}
+          onSubmitReview={(rating, review) => {
+            // Lógica para enviar la reseña
+            setReviewModalVisible(false);
+          }}
+          
+        />
+      )}
     </View>
   );
 };
@@ -92,6 +128,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     borderRadius: 20,
     padding: 10,
+  },
+  floatingButtonContainer: {
+    position: 'absolute',
+    bottom: 30,
+    right: 30,
+  },
+  floatingButton: {
+    backgroundColor: colors['magenta'],
+    borderRadius: 50,
+    padding: 15,
+    elevation: 5,
   },
 });
 
