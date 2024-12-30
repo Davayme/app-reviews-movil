@@ -10,7 +10,7 @@ import {
   ScrollView 
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialIcons, Ionicons, FontAwesome5, Feather } from '@expo/vector-icons';
+import { Ionicons, FontAwesome5, Feather } from '@expo/vector-icons';
 import { colors } from '@/app/common/utils/constants';
 import tw from 'tailwind-react-native-classnames';
 import { GenreChip } from './GenreChip';

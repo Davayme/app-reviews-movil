@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Modal,
@@ -7,11 +7,18 @@ import {
   TouchableOpacity,
   TextInput,
   Dimensions,
-} from 'react-native';
-import { Feather } from '@expo/vector-icons';
-import { colors } from '@/app/common/utils/constants';
+  ActivityIndicator,
+} from "react-native";
+import { Feather } from "@expo/vector-icons";
+import { colors } from "@/app/common/utils/constants";
+import {
+  addToWatchlist,
+  removeFromWatchlist,
+  updateMovieViewedStatus,
+} from "../../services/watchlistService";
+import { useToast } from "@/app/common/components/Toast/useToast";
 
-const { height } = Dimensions.get('window');
+const { height } = Dimensions.get("window");
 
 interface ReviewModalProps {
   isVisible: boolean;
@@ -21,6 +28,11 @@ interface ReviewModalProps {
   onWatchlistToggle: () => void;
   onWatchedToggle: () => void;
   onSubmitReview: (rating: number, review?: string) => void;
+  userId: number;
+  movieId: number;
+  movieTitle: string;
+  posterPath: string;
+  releaseDate: string;
 }
 
 const ReviewModal: React.FC<ReviewModalProps> = ({
@@ -31,16 +43,71 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
   onWatchlistToggle,
   onWatchedToggle,
   onSubmitReview,
+  userId,
+  movieId,
+  movieTitle,
+  posterPath,
+  releaseDate,
 }) => {
   const [rating, setRating] = useState<number>(0);
-  const [review, setReview] = useState<string>('');
+  const [review, setReview] = useState<string>("");
   const [showReviewInput, setShowReviewInput] = useState<boolean>(false);
+  const [loadingWatchlist, setLoadingWatchlist] = useState<boolean>(false);
+  const [loadingWatched, setLoadingWatched] = useState<boolean>(false);
+  const [localIsInWatchlist, setLocalIsInWatchlist] =
+    useState<boolean>(isInWatchlist);
+  const [localIsWatched, setLocalIsWatched] = useState<boolean>(isWatched);
+  const { showToast } = useToast();
+
+  const handleWatchlistToggle = async () => {
+    setLoadingWatchlist(true);
+    try {
+      if (localIsInWatchlist) {
+        await removeFromWatchlist(userId, movieId);
+        
+      } else {
+        await addToWatchlist({
+          userId,
+          movieId,
+          title : movieTitle,
+          posterPath,
+          releaseDate : new Date(releaseDate),
+        });
+        
+      }
+      setLocalIsInWatchlist(!localIsInWatchlist);
+      onWatchlistToggle();
+    } catch (error) {
+      console.error("Error toggling watchlist:", error);
+      showToast("Error al actualizar la watchlist", "error");
+    } finally {
+      setLoadingWatchlist(false);
+    }
+  };
+
+  const handleWatchedToggle = async () => {
+    setLoadingWatched(true);
+    try {
+      await updateMovieViewedStatus({
+        userId,
+        movieId,
+        viewed: !localIsWatched,
+      });
+      setLocalIsWatched(!localIsWatched);
+      onWatchedToggle();
+    } catch (error) {
+      console.error("Error toggling watched status:", error);
+      showToast("Error al actualizar el estado de vista", "error");
+    } finally {
+      setLoadingWatched(false);
+    }
+  };
 
   const renderStar = (position: number) => {
     const filled = position <= rating;
     return (
-      <TouchableOpacity 
-        key={position} 
+      <TouchableOpacity
+        key={position}
         onPress={() => {
           setRating(position);
           setShowReviewInput(true);
@@ -48,9 +115,9 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
         style={styles.starContainer}
       >
         <Feather
-          name={filled ? 'star' : 'star'}
+          name={filled ? "star" : "star"}
           size={32}
-          color={filled ? '#FFD700' : '#666'}
+          color={filled ? "#FFD700" : "#666"}
         />
       </TouchableOpacity>
     );
@@ -63,7 +130,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
       animationType="slide"
       statusBarTranslucent
     >
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.overlay}
         activeOpacity={1}
         onPress={onClose}
@@ -74,30 +141,70 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
 
           {/* Iconos de Watchlist y Watched */}
           <View style={styles.actionButtons}>
-            <TouchableOpacity 
-              style={styles.actionButton}
-              onPress={onWatchlistToggle}
+            <TouchableOpacity
+              style={[
+                styles.actionButton,
+                loadingWatchlist && styles.actionButtonLoading,
+              ]}
+              onPress={handleWatchlistToggle}
+              disabled={loadingWatchlist}
             >
-              <Feather
-                name={isInWatchlist ? 'check-circle' : 'plus-circle'}
-                size={28}
-                color={isInWatchlist ? '#1DB954' : '#CCC'}
-              />
-              <Text style={styles.actionText}>Watchlist</Text>
+              <View style={styles.iconContainer}>
+                {loadingWatchlist ? (
+                  <ActivityIndicator
+                    size="small"
+                    color={colors.yellow}
+                    style={styles.loadingIndicator}
+                  />
+                ) : (
+                  <Feather
+                    name={localIsInWatchlist ? "check-circle" : "plus-circle"}
+                    size={28}
+                    color={localIsInWatchlist ? "#10ccd0" : "#CCC"}
+                  />
+                )}
+              </View>
+              <Text
+                style={[
+                  styles.actionText,
+                  localIsInWatchlist && styles.actionTextActive,
+                ]}
+              >
+                Watchlist
+              </Text>
             </TouchableOpacity>
 
-            {isInWatchlist && (
-              <TouchableOpacity 
-                style={styles.actionButton}
-                onPress={onWatchedToggle}
+            {localIsInWatchlist && (
+              <TouchableOpacity
+                style={[
+                  styles.actionButton,
+                  loadingWatched && styles.actionButtonLoading,
+                ]}
+                onPress={handleWatchedToggle}
+                disabled={loadingWatched}
               >
-                <Feather
-                  name={isWatched ? 'eye' : 'eye-off'}
-                  size={28}
-                  color={isWatched ? '#1DB954' : '#CCC'}
-                />
-                <Text style={styles.actionText}>
-                  {isWatched ? 'Vista' : 'Por ver'}
+                <View style={styles.iconContainer}>
+                  {loadingWatched ? (
+                    <ActivityIndicator
+                      size="small"
+                      color={colors.yellow}
+                      style={styles.loadingIndicator}
+                    />
+                  ) : (
+                    <Feather
+                      name={localIsWatched ? "eye" : "eye-off"}
+                      size={28}
+                      color={localIsWatched ? colors.yellow : "#CCC"}
+                    />
+                  )}
+                </View>
+                <Text
+                  style={[
+                    styles.actionText,
+                    localIsWatched && styles.actionTextActive,
+                  ]}
+                >
+                  {localIsWatched ? "Vista" : "Por ver"}
                 </Text>
               </TouchableOpacity>
             )}
@@ -123,7 +230,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
                 value={review}
                 onChangeText={setReview}
               />
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.submitButton}
                 onPress={() => onSubmitReview(rating, review)}
               >
@@ -140,11 +247,11 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: '#1A1A1A',
+    backgroundColor: "#1A1A1A",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     minHeight: height * 0.6,
@@ -154,36 +261,36 @@ const styles = StyleSheet.create({
   dragLine: {
     width: 40,
     height: 4,
-    backgroundColor: '#666',
+    backgroundColor: "#666",
     borderRadius: 2,
-    alignSelf: 'center',
+    alignSelf: "center",
     marginBottom: 20,
   },
   actionButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
+    flexDirection: "row",
+    justifyContent: "space-evenly",
     marginBottom: 30,
   },
   actionButton: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   actionText: {
-    color: '#CCC',
+    color: "#CCC",
     marginTop: 8,
     fontSize: 14,
   },
   ratingContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 30,
   },
   ratingLabel: {
-    color: '#FFF',
+    color: "#FFF",
     fontSize: 18,
     marginBottom: 16,
   },
   starsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
   },
   starContainer: {
     padding: 8,
@@ -192,24 +299,38 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   reviewInput: {
-    backgroundColor: '#333',
+    backgroundColor: "#333",
     borderRadius: 8,
     padding: 12,
-    color: '#FFF',
+    color: "#FFF",
     height: 120,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
   },
   submitButton: {
-    backgroundColor: '#1DB954',
+    backgroundColor: "#1DB954",
     borderRadius: 8,
     padding: 16,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 16,
   },
   submitButtonText: {
-    color: '#FFF',
+    color: "#FFF",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
+  },
+  iconContainer: {
+    height: 28,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingIndicator: {
+    transform: [{ scale: 0.8 }],
+  },
+  actionButtonLoading: {
+    opacity: 0.7,
+  },
+  actionTextActive: {
+    color: 'white',
   },
 });
 

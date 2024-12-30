@@ -50,6 +50,7 @@ const MovieDetailScreen: React.FC = () => {
   const [isReviewModalVisible, setReviewModalVisible] = useState(false);
   const router = useRouter();
 
+  
   useEffect(() => {
     const fetchMovieDetails = async () => {
       try {
@@ -94,7 +95,12 @@ const MovieDetailScreen: React.FC = () => {
       </Animatable.View>
       {movie && (
         <ReviewModal
+          userId={userId}
+          movieId={movie.id}
           isVisible={isReviewModalVisible}
+          movieTitle={movie.title}
+          posterPath={movie.poster_path}
+          releaseDate={movie.release_date}
           onClose={() => setReviewModalVisible(false)}
           isInWatchlist={movie.inWatchlist}
           isWatched={movie.viewed}
