@@ -8,6 +8,9 @@ import {
   TextInput,
   Dimensions,
   ActivityIndicator,
+  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { colors } from "@/app/common/utils/constants";
@@ -17,6 +20,8 @@ import {
   updateMovieViewedStatus,
 } from "../../services/watchlistService";
 import { useToast } from "@/app/common/components/Toast/useToast";
+import { createReview } from "../../services/reviewService";
+
 
 const { height } = Dimensions.get("window");
 
@@ -58,22 +63,20 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
     useState<boolean>(isInWatchlist);
   const [localIsWatched, setLocalIsWatched] = useState<boolean>(isWatched);
   const { showToast } = useToast();
-
+  const [containsSpoiler, setContainsSpoiler] = useState<boolean>(false);
   const handleWatchlistToggle = async () => {
     setLoadingWatchlist(true);
     try {
       if (localIsInWatchlist) {
         await removeFromWatchlist(userId, movieId);
-        
       } else {
         await addToWatchlist({
           userId,
           movieId,
-          title : movieTitle,
+          title: movieTitle,
           posterPath,
-          releaseDate : new Date(releaseDate),
+          releaseDate: new Date(releaseDate),
         });
-        
       }
       setLocalIsInWatchlist(!localIsInWatchlist);
       onWatchlistToggle();
@@ -117,7 +120,8 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
         <Feather
           name={filled ? "star" : "star"}
           size={32}
-          color={filled ? "#FFD700" : "#666"}
+          color={filled ? colors.yellow : "#666"}
+          style={[styles.star, filled && styles.starFilled]}
         />
       </TouchableOpacity>
     );
@@ -130,116 +134,214 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
       animationType="slide"
       statusBarTranslucent
     >
-      <TouchableOpacity
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.overlay}
-        activeOpacity={1}
-        onPress={onClose}
       >
-        <View style={styles.modalContent}>
-          {/* Header con línea de arrastre */}
-          <View style={styles.dragLine} />
+        <TouchableOpacity
+          style={styles.overlay}
+          activeOpacity={1}
+          onPress={onClose}
+        >
+          <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
+            <View style={styles.modalContent}>
+              <View style={styles.dragLine} />
 
-          {/* Iconos de Watchlist y Watched */}
-          <View style={styles.actionButtons}>
-            <TouchableOpacity
-              style={[
-                styles.actionButton,
-                loadingWatchlist && styles.actionButtonLoading,
-              ]}
-              onPress={handleWatchlistToggle}
-              disabled={loadingWatchlist}
-            >
-              <View style={styles.iconContainer}>
-                {loadingWatchlist ? (
-                  <ActivityIndicator
-                    size="small"
-                    color={colors.yellow}
-                    style={styles.loadingIndicator}
-                  />
-                ) : (
-                  <Feather
-                    name={localIsInWatchlist ? "check-circle" : "plus-circle"}
-                    size={28}
-                    color={localIsInWatchlist ? "#10ccd0" : "#CCC"}
-                  />
+              <View style={styles.actionButtons}>
+                <TouchableOpacity
+                  style={[
+                    styles.actionButton,
+                    loadingWatchlist && styles.actionButtonLoading,
+                  ]}
+                  onPress={handleWatchlistToggle}
+                  disabled={loadingWatchlist}
+                >
+                  <View style={styles.iconContainer}>
+                    {loadingWatchlist ? (
+                      <ActivityIndicator
+                        size="small"
+                        color={colors.yellow}
+                        style={styles.loadingIndicator}
+                      />
+                    ) : (
+                      <Feather
+                        name={
+                          localIsInWatchlist ? "check-circle" : "plus-circle"
+                        }
+                        size={28}
+                        color={localIsInWatchlist ? "#10ccd0" : "#CCC"}
+                      />
+                    )}
+                  </View>
+                  <Text
+                    style={[
+                      styles.actionText,
+                      localIsInWatchlist && styles.actionTextActive,
+                    ]}
+                  >
+                    Watchlist
+                  </Text>
+                </TouchableOpacity>
+
+                {localIsInWatchlist && (
+                  <TouchableOpacity
+                    style={[
+                      styles.actionButton,
+                      loadingWatched && styles.actionButtonLoading,
+                    ]}
+                    onPress={handleWatchedToggle}
+                    disabled={loadingWatched}
+                  >
+                    <View style={styles.iconContainer}>
+                      {loadingWatched ? (
+                        <ActivityIndicator
+                          size="small"
+                          color={colors.yellow}
+                          style={styles.loadingIndicator}
+                        />
+                      ) : (
+                        <Feather
+                          name={localIsWatched ? "eye" : "eye-off"}
+                          size={28}
+                          color={localIsWatched ? colors.yellow : "#CCC"}
+                        />
+                      )}
+                    </View>
+                    <Text
+                      style={[
+                        styles.actionText,
+                        localIsWatched && styles.actionTextActive,
+                      ]}
+                    >
+                      {localIsWatched ? "Vista" : "Por ver"}
+                    </Text>
+                  </TouchableOpacity>
                 )}
               </View>
-              <Text
-                style={[
-                  styles.actionText,
-                  localIsInWatchlist && styles.actionTextActive,
-                ]}
-              >
-                Watchlist
-              </Text>
-            </TouchableOpacity>
-
-            {localIsInWatchlist && (
-              <TouchableOpacity
-                style={[
-                  styles.actionButton,
-                  loadingWatched && styles.actionButtonLoading,
-                ]}
-                onPress={handleWatchedToggle}
-                disabled={loadingWatched}
-              >
-                <View style={styles.iconContainer}>
-                  {loadingWatched ? (
-                    <ActivityIndicator
-                      size="small"
-                      color={colors.yellow}
-                      style={styles.loadingIndicator}
-                    />
-                  ) : (
-                    <Feather
-                      name={localIsWatched ? "eye" : "eye-off"}
-                      size={28}
-                      color={localIsWatched ? colors.yellow : "#CCC"}
-                    />
-                  )}
-                </View>
-                <Text
-                  style={[
-                    styles.actionText,
-                    localIsWatched && styles.actionTextActive,
-                  ]}
-                >
-                  {localIsWatched ? "Vista" : "Por ver"}
+              <View style={styles.ratingContainer}>
+                <Text style={styles.sectionTitle}>
+                  <Feather
+                    name="star"
+                    size={20}
+                    color="#FFF"
+                    style={styles.sectionIcon}
+                  />
+                  Califica esta película
                 </Text>
-              </TouchableOpacity>
-            )}
-          </View>
+                <View style={styles.starsContainer}>
+                  {[1, 2, 3, 4, 5].map((num) => renderStar(num))}
+                </View>
+                {rating > 0 && (
+                  <Text style={styles.ratingHint}>
+                    {rating === 5
+                      ? "¡Excelente!"
+                      : rating === 4
+                      ? "Muy buena"
+                      : rating === 3
+                      ? "Buena"
+                      : rating === 2
+                      ? "Regular"
+                      : "Mala"}
+                  </Text>
+                )}
+              </View>
+              {showReviewInput && (
+                <View style={styles.reviewContainer}>
+                  <Text style={styles.sectionTitle}>
+                    <Feather
+                      name="edit-3"
+                      size={20}
+                      color="#FFF"
+                      style={styles.sectionIcon}
+                    />
+                    Escribe tu reseña
+                  </Text>
 
-          {/* Sistema de Rating */}
-          <View style={styles.ratingContainer}>
-            <Text style={styles.ratingLabel}>Califica esta película</Text>
-            <View style={styles.starsContainer}>
-              {[1, 2, 3, 4, 5].map((num) => renderStar(num))}
-            </View>
-          </View>
+                  <TextInput
+                    style={styles.reviewInput}
+                    placeholder="¿Qué te pareció la película?"
+                    placeholderTextColor="#666"
+                    multiline
+                    numberOfLines={4}
+                    value={review}
+                    onChangeText={setReview}
+                    textAlignVertical="top"
+                    autoCapitalize="sentences"
+                    keyboardType="default"
+                    returnKeyType="done"
+                  />
 
-          {/* Campo de Review (condicional) */}
-          {showReviewInput && (
-            <View style={styles.reviewContainer}>
-              <TextInput
-                style={styles.reviewInput}
-                placeholder="Escribe tu reseña..."
-                placeholderTextColor="#666"
-                multiline
-                numberOfLines={4}
-                value={review}
-                onChangeText={setReview}
-              />
-              <TouchableOpacity
-                style={styles.submitButton}
-                onPress={() => onSubmitReview(rating, review)}
-              >
-                <Text style={styles.submitButtonText}>Enviar Reseña</Text>
-              </TouchableOpacity>
+                  <View style={styles.spoilerContainer}>
+                    <View style={styles.spoilerHeader}>
+                      <Feather
+                        name="alert-triangle"
+                        size={20}
+                        color={containsSpoiler ? colors.magenta : "#666"}
+                      />
+                      <Text style={styles.spoilerHeaderText}>
+                        ¿Tu reseña contiene spoilers?
+                      </Text>
+                    </View>
+
+                    <TouchableOpacity
+                      style={[
+                        styles.spoilerToggle,
+                        containsSpoiler && styles.spoilerToggleActive,
+                      ]}
+                      onPress={() => setContainsSpoiler(!containsSpoiler)}
+                    >
+                      <View
+                        style={[
+                          styles.spoilerIndicator,
+                          containsSpoiler && styles.spoilerIndicatorActive,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.spoilerStateText,
+                            containsSpoiler && styles.spoilerStateTextActive,
+                          ]}
+                        >
+                          {containsSpoiler ? "SÍ" : "NO"}
+                        </Text>
+                      </View>
+
+                      <Text
+                        style={[
+                          styles.spoilerToggleText,
+                          containsSpoiler && styles.spoilerToggleTextActive,
+                        ]}
+                      >
+                        {containsSpoiler
+                          ? "¡Cuidado! Tu reseña contiene spoilers"
+                          : "Sin spoilers"}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.submitButton,
+                      (!rating || !review.trim()) &&
+                        styles.submitButtonDisabled,
+                    ]}
+                    onPress={() => onSubmitReview(rating, review)}
+                    disabled={!rating || !review.trim()}
+                  >
+                    <Feather
+                      name="send"
+                      size={20}
+                      color="#FFF"
+                      style={styles.submitIcon}
+                    />
+                    <Text style={styles.submitButtonText}>Publicar reseña</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
-          )}
-        </View>
-      </TouchableOpacity>
+          </TouchableWithoutFeedback>
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };
@@ -257,6 +359,7 @@ const styles = StyleSheet.create({
     minHeight: height * 0.6,
     padding: 20,
     paddingTop: 12,
+    paddingBottom: Platform.OS === "ios" ? 40 : 20, // Ajuste para iOS
   },
   dragLine: {
     width: 40,
@@ -298,26 +401,6 @@ const styles = StyleSheet.create({
   reviewContainer: {
     marginTop: 20,
   },
-  reviewInput: {
-    backgroundColor: "#333",
-    borderRadius: 8,
-    padding: 12,
-    color: "#FFF",
-    height: 120,
-    textAlignVertical: "top",
-  },
-  submitButton: {
-    backgroundColor: "#1DB954",
-    borderRadius: 8,
-    padding: 16,
-    alignItems: "center",
-    marginTop: 16,
-  },
-  submitButtonText: {
-    color: "#FFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
   iconContainer: {
     height: 28,
     justifyContent: "center",
@@ -330,7 +413,147 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   actionTextActive: {
-    color: 'white',
+    color: "white",
+  },
+  sectionTitle: {
+    flexDirection: "row",
+    alignItems: "center",
+    color: "#FFF",
+    fontSize: 18,
+    marginBottom: 16,
+  },
+  sectionIcon: {
+    marginRight: 8,
+  },
+  star: {
+    transform: [{ scale: 1 }],
+  },
+  starFilled: {
+    transform: [{ scale: 1.1 }],
+  },
+  ratingHint: {
+    color: colors.yellow,
+    fontSize: 16,
+    marginTop: 8,
+    fontWeight: "500",
+  },
+  reviewInput: {
+    backgroundColor: "#222",
+    borderRadius: 12,
+    padding: 16,
+    color: "#FFF",
+    height: 120,
+    textAlignVertical: "top",
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: "#333",
+  },
+  spoilerButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: "#222",
+    marginTop: 12,
+    alignSelf: "flex-start",
+  },
+  spoilerButtonActive: {
+    backgroundColor: `${colors.magenta}20`,
+  },
+  spoilerText: {
+    color: "#666",
+    marginLeft: 8,
+    fontSize: 14,
+  },
+  spoilerTextActive: {
+    color: colors.magenta,
+  },
+  submitButton: {
+    backgroundColor: colors.magenta,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: "center",
+    marginTop: 20,
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  submitButtonDisabled: {
+    backgroundColor: "#444",
+    opacity: 0.7,
+  },
+  submitIcon: {
+    marginRight: 8,
+  },
+  submitButtonText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  spoilerContainer: {
+    marginTop: 16,
+    marginBottom: 8,
+    backgroundColor: '#222',
+    borderRadius: 12,
+    padding: 16,
+  },
+  
+  spoilerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  
+  spoilerHeaderText: {
+    color: '#FFF',
+    fontSize: 16,
+    marginLeft: 8,
+    fontWeight: '500',
+  },
+  
+  spoilerToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#333',
+    borderRadius: 8,
+    padding: 12,
+  },
+  
+  spoilerToggleActive: {
+    backgroundColor: `${colors.magenta}15`,
+    borderColor: colors.magenta,
+    borderWidth: 1,
+  },
+  
+  spoilerIndicator: {
+    backgroundColor: '#444',
+    borderRadius: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginRight: 12,
+  },
+  
+  spoilerIndicatorActive: {
+    backgroundColor: colors.magenta,
+  },
+  
+  spoilerStateText: {
+    color: '#CCC',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  
+  spoilerStateTextActive: {
+    color: '#FFF',
+  },
+  
+  spoilerToggleText: {
+    color: '#CCC',
+    fontSize: 14,
+  },
+  
+  spoilerToggleTextActive: {
+    color: colors.magenta,
   },
 });
 
