@@ -50,7 +50,6 @@ const MovieDetailScreen: React.FC = () => {
   const [isReviewModalVisible, setReviewModalVisible] = useState(false);
   const router = useRouter();
 
-  
   useEffect(() => {
     const fetchMovieDetails = async () => {
       try {
@@ -65,6 +64,24 @@ const MovieDetailScreen: React.FC = () => {
 
     fetchMovieDetails();
   }, [id, userId]);
+
+  const handleWatchlistToggle = () => {
+    if (movie) {
+      setMovie({
+        ...movie,
+        inWatchlist: !movie.inWatchlist,
+      });
+    }
+  };
+
+  const handleWatchedToggle = () => {
+    if (movie) {
+      setMovie({
+        ...movie,
+        viewed: !movie.viewed,
+      });
+    }
+  };
 
   if (loading) {
     return <CustomLoading />;
@@ -104,17 +121,11 @@ const MovieDetailScreen: React.FC = () => {
           onClose={() => setReviewModalVisible(false)}
           isInWatchlist={movie.inWatchlist}
           isWatched={movie.viewed}
-          onWatchlistToggle={() => {
-            // Lógica para agregar o quitar de la watchlist
-          }}
-          onWatchedToggle={() => {
-            // Lógica para marcar como vista o no vista
-          }}
+          onWatchlistToggle={handleWatchlistToggle}
+          onWatchedToggle={handleWatchedToggle}
           onSubmitReview={(rating, review) => {
-            // Lógica para enviar la reseña
             setReviewModalVisible(false);
           }}
-          
         />
       )}
     </View>
