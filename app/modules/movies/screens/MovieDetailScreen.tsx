@@ -69,14 +69,14 @@ const MovieDetailScreen: React.FC = () => {
           getUserReviewByMovie(userId, id)
         ]);
         setMovie(movieDetails);
-        setUserReview(review);
+        setUserReview(review || null); // Asegurarse de que review sea null si no existe
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
-
+  
     fetchMovieDetails();
   }, [id, userId]);
 
@@ -116,6 +116,7 @@ const MovieDetailScreen: React.FC = () => {
       setUserReview(null); // Eliminar la reseña del estado
     }
   };
+  
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={() => router.push('/modules/movies/screens/MainScreen')}>

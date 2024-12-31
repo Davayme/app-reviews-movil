@@ -128,7 +128,11 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
   };
 
   const handleUpdateReview = async () => {
-    if (!existingReview) return;
+    console.log("Actualizando reseña:", existingReview);
+    if (!existingReview || existingReview.id === 0) {
+      console.log("No se puede actualizar: existingReview no válido");
+      return;
+    }
     setLoadingSubmit(true);
     try {
       await updateReview(existingReview.id, {
@@ -136,7 +140,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
         reviewText: review.trim(),
         containsSpoiler,
       });
-
+  
       showToast("¡Reseña actualizada con éxito!", "success");
       onSubmitReview(rating, review);
       resetStates();
@@ -148,9 +152,13 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
       setLoadingSubmit(false);
     }
   };
-
+  
   const handleDeleteReview = async () => {
-    if (!existingReview) return;
+    console.log("Eliminando reseña:", existingReview);
+    if (!existingReview || existingReview.id === 0) {
+      console.log("No se puede eliminar: existingReview no válido");
+      return;
+    }
     setLoadingSubmit(true);
     try {
       await deleteReview(existingReview.id);
@@ -165,18 +173,23 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
       setLoadingSubmit(false);
     }
   };
+  
 
   const handleSubmitReview = async () => {
     setLoadingSubmit(true);
     try {
-      await createReview({
-        userId,
+      const reviewData = {
+        userId: Number(userId), 
         movieId,
         rating,
         reviewText: review.trim(),
         containsSpoiler,
-      });
-
+      };
+  
+      console.log("Enviando datos de reseña:", reviewData); // Agregar log para verificar los datos
+  
+      await createReview(reviewData);
+  
       showToast("¡Reseña publicada con éxito!", "success");
       onSubmitReview(rating, review);
       resetStates();
