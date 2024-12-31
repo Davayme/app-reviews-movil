@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Modal,
@@ -20,7 +20,11 @@ import {
   updateMovieViewedStatus,
 } from "../../services/watchlistService";
 import { useToast } from "@/app/common/components/Toast/useToast";
-import { createReview, deleteReview, updateReview } from "../../services/reviewService";
+import {
+  createReview,
+  deleteReview,
+  updateReview,
+} from "../../services/reviewService";
 
 const { height } = Dimensions.get("window");
 
@@ -79,6 +83,26 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
   const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
+  useEffect(() => {
+    if (isVisible) {
+      setRating(existingReview?.rating || 0);
+      setReview(existingReview?.reviewText || "");
+      setContainsSpoiler(existingReview?.containsSpoiler || false);
+      setIsEditing(false);
+      setShowReviewInput(!!existingReview);
+    } else {
+      resetStates();
+    }
+  }, [existingReview, isVisible]);
+
+  const resetStates = () => {
+    setRating(0);
+    setReview("");
+    setContainsSpoiler(false);
+    setShowReviewInput(false);
+    setIsEditing(false);
+  };
+
   const handleWatchlistToggle = async () => {
     setLoadingWatchlist(true);
     try {
@@ -104,9 +128,10 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
   };
 
   const handleUpdateReview = async () => {
+    if (!existingReview) return;
     setLoadingSubmit(true);
     try {
-      await updateReview(existingReview!.id, {
+      await updateReview(existingReview.id, {
         rating,
         reviewText: review.trim(),
         containsSpoiler,
@@ -114,6 +139,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
 
       showToast("¡Reseña actualizada con éxito!", "success");
       onSubmitReview(rating, review);
+      resetStates();
       onClose();
     } catch (error) {
       console.error("Error updating review:", error);
@@ -124,12 +150,13 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
   };
 
   const handleDeleteReview = async () => {
+    if (!existingReview) return;
     setLoadingSubmit(true);
     try {
-      await deleteReview(existingReview!.id);
-
+      await deleteReview(existingReview.id);
       showToast("¡Reseña eliminada con éxito!", "success");
       onSubmitReview(0, "");
+      resetStates();
       onClose();
     } catch (error) {
       console.error("Error deleting review:", error);
@@ -151,11 +178,9 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
       });
 
       showToast("¡Reseña publicada con éxito!", "success");
-      setRating(0);
-      setReview("");
-      setContainsSpoiler(false);
-      setShowReviewInput(false);
       onSubmitReview(rating, review);
+      resetStates();
+      onClose();
     } catch (error) {
       console.error("Error submitting review:", error);
       showToast("Error al publicar la reseña", "error");
@@ -683,35 +708,35 @@ const styles = StyleSheet.create({
     backgroundColor: "#222",
     borderRadius: 12,
     padding: 16,
-    color: '#FFF',
+    color: "#FFF",
     height: 120,
     textAlignVertical: "top",
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: "#333",
   },
   spoilerContainer: {
     marginTop: 16,
     marginBottom: 8,
-    backgroundColor: '#222',
+    backgroundColor: "#222",
     borderRadius: 12,
     padding: 16,
   },
   spoilerHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 12,
   },
   spoilerHeaderText: {
-    color: '#FFF',
+    color: "#FFF",
     fontSize: 16,
     marginLeft: 8,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   spoilerToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#333',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#333",
     borderRadius: 8,
     padding: 12,
   },
@@ -721,7 +746,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   spoilerIndicator: {
-    backgroundColor: '#444',
+    backgroundColor: "#444",
     borderRadius: 4,
     paddingHorizontal: 8,
     paddingVertical: 4,
@@ -731,96 +756,96 @@ const styles = StyleSheet.create({
     backgroundColor: colors.magenta,
   },
   spoilerStateText: {
-    color: '#CCC',
+    color: "#CCC",
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   spoilerStateTextActive: {
-    color: '#FFF',
+    color: "#FFF",
   },
   spoilerToggleText: {
-    color: '#CCC',
+    color: "#CCC",
     fontSize: 14,
   },
   spoilerToggleTextActive: {
     color: colors.magenta,
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginTop: 20,
   },
   submitButton: {
     backgroundColor: colors.magenta,
     borderRadius: 12,
     padding: 16,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    width: '48%',
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    width: "48%",
   },
   submitButtonDisabled: {
-    backgroundColor: '#444',
+    backgroundColor: "#444",
     opacity: 0.7,
   },
   submitIcon: {
     marginRight: 8,
   },
   submitButtonText: {
-    color: '#FFF',
+    color: "#FFF",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   cancelButton: {
-    backgroundColor: '#666',
+    backgroundColor: "#666",
     borderRadius: 12,
     padding: 16,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    width: '48%',
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    width: "48%",
   },
   cancelIcon: {
     marginRight: 8,
   },
   cancelButtonText: {
-    color: '#FFF',
+    color: "#FFF",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   editButton: {
     backgroundColor: colors.magenta,
     borderRadius: 12,
     padding: 16,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    width: '48%',
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    width: "48%",
   },
   editIcon: {
     marginRight: 8,
   },
   editButtonText: {
-    color: '#FFF',
+    color: "#FFF",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   deleteButton: {
-    backgroundColor: '#FF3B30',
+    backgroundColor: "#FF3B30",
     borderRadius: 12,
     padding: 16,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    width: '48%',
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    width: "48%",
   },
   deleteIcon: {
     marginRight: 8,
   },
   deleteButtonText: {
-    color: '#FFF',
+    color: "#FFF",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });
 export default ReviewModal;

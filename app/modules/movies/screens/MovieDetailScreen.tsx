@@ -102,6 +102,20 @@ const MovieDetailScreen: React.FC = () => {
     return <CustomLoading />;
   }
 
+  const handleReviewSubmit = (rating: number, review?: string) => {
+    if (review) {
+      setUserReview({
+        id: userReview?.id ?? 0,
+        rating,
+        reviewText: review,
+        containsSpoiler: userReview?.containsSpoiler ?? false,
+        likesCount: userReview?.likesCount ?? 0,
+        createdAt: userReview?.createdAt ?? new Date().toISOString(),
+      });
+    } else {
+      setUserReview(null); // Eliminar la reseña del estado
+    }
+  };
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={() => router.push('/modules/movies/screens/MainScreen')}>
@@ -139,20 +153,7 @@ const MovieDetailScreen: React.FC = () => {
           onWatchlistToggle={handleWatchlistToggle}
           onWatchedToggle={handleWatchedToggle}
           existingReview={userReview}
-          onSubmitReview={(rating, review) => {
-            setReviewModalVisible(false);
-            if (review) {
-              setUserReview({
-                ...userReview,
-                rating,
-                reviewText: review,
-                id: userReview?.id ?? 0,
-                containsSpoiler: userReview?.containsSpoiler ?? false,
-                likesCount: userReview?.likesCount ?? 0,
-                createdAt: userReview?.createdAt ?? new Date().toISOString(),
-              });
-            }
-          }}
+          onSubmitReview={handleReviewSubmit}
         />
       )}
     </View>
