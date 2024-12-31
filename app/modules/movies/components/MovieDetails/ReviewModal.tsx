@@ -35,7 +35,7 @@ interface ReviewModalProps {
   isWatched: boolean;
   onWatchlistToggle: () => void;
   onWatchedToggle: () => void;
-  onSubmitReview: (rating: number, review?: string) => void;
+  onSubmitReview: (rating: number, review?: string, newReview?: any) => void;
   userId: number;
   movieId: number;
   movieTitle: string;
@@ -174,12 +174,13 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
     }
   };
   
+  
 
   const handleSubmitReview = async () => {
     setLoadingSubmit(true);
     try {
       const reviewData = {
-        userId: Number(userId), 
+        userId: Number(userId), // Asegurarse de que userId sea un número
         movieId,
         rating,
         reviewText: review.trim(),
@@ -188,10 +189,10 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
   
       console.log("Enviando datos de reseña:", reviewData); // Agregar log para verificar los datos
   
-      await createReview(reviewData);
+      const newReview = await createReview(reviewData);
   
       showToast("¡Reseña publicada con éxito!", "success");
-      onSubmitReview(rating, review);
+      onSubmitReview(rating, review, newReview); // Pasar la nueva reseña al componente padre
       resetStates();
       onClose();
     } catch (error) {

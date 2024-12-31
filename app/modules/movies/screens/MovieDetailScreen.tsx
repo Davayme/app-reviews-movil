@@ -102,8 +102,10 @@ const MovieDetailScreen: React.FC = () => {
     return <CustomLoading />;
   }
 
-  const handleReviewSubmit = (rating: number, review?: string) => {
-    if (review) {
+  const handleReviewSubmit = (rating: number, review?: string, newReview?: any) => {
+    if (newReview) {
+      setUserReview(newReview);
+    } else if (review) {
       setUserReview({
         id: userReview?.id ?? 0,
         rating,
