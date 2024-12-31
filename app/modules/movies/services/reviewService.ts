@@ -75,3 +75,33 @@ export const deleteReview = async (id: number) => {
         throw error;
     }
 };
+
+export const getUserReviewByMovie = async (userId: number, movieId: number) => {
+    try {
+      const response = await fetch(`${API_URL}/reviews/user/${userId}/movie/${movieId}`);
+      if (!response.ok) {
+        if (response.status === 404) {
+          return null; // Usuario no tiene reseña para esta película
+        }
+        throw new Error('Error fetching user review');
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error getting user review:', error);
+      return null; // Retornamos null en caso de error
+    }
+  };
+
+export const getOtherReviewsByMovie = async (movieId: number, userId: number) => {
+    try {
+        const response = await fetch(`${API_URL}/reviews/movie/${movieId}/others/${userId}`);
+        if (!response.ok) {
+            throw new Error('Error fetching other reviews');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error getting other reviews:', error);
+        throw error;
+    }
+};

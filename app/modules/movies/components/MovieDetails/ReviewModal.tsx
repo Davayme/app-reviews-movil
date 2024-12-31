@@ -20,8 +20,7 @@ import {
   updateMovieViewedStatus,
 } from "../../services/watchlistService";
 import { useToast } from "@/app/common/components/Toast/useToast";
-import { createReview } from "../../services/reviewService";
-
+import { createReview, deleteReview, updateReview } from "../../services/reviewService";
 
 const { height } = Dimensions.get("window");
 
@@ -38,6 +37,14 @@ interface ReviewModalProps {
   movieTitle: string;
   posterPath: string;
   releaseDate: string;
+  existingReview: {
+    id: number;
+    rating: number;
+    reviewText: string | null;
+    containsSpoiler: boolean;
+    likesCount: number;
+    createdAt: string;
+  } | null;
 }
 
 const ReviewModal: React.FC<ReviewModalProps> = ({
@@ -53,9 +60,12 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
   movieTitle,
   posterPath,
   releaseDate,
+  existingReview,
 }) => {
-  const [rating, setRating] = useState<number>(0);
-  const [review, setReview] = useState<string>("");
+  const [rating, setRating] = useState<number>(existingReview?.rating || 0);
+  const [review, setReview] = useState<string>(
+    existingReview?.reviewText || ""
+  );
   const [showReviewInput, setShowReviewInput] = useState<boolean>(false);
   const [loadingWatchlist, setLoadingWatchlist] = useState<boolean>(false);
   const [loadingWatched, setLoadingWatched] = useState<boolean>(false);
@@ -63,7 +73,12 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
     useState<boolean>(isInWatchlist);
   const [localIsWatched, setLocalIsWatched] = useState<boolean>(isWatched);
   const { showToast } = useToast();
-  const [containsSpoiler, setContainsSpoiler] = useState<boolean>(false);
+  const [containsSpoiler, setContainsSpoiler] = useState<boolean>(
+    existingReview?.containsSpoiler || false
+  );
+  const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+
   const handleWatchlistToggle = async () => {
     setLoadingWatchlist(true);
     try {
@@ -85,6 +100,67 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
       showToast("Error al actualizar la watchlist", "error");
     } finally {
       setLoadingWatchlist(false);
+    }
+  };
+
+  const handleUpdateReview = async () => {
+    setLoadingSubmit(true);
+    try {
+      await updateReview(existingReview!.id, {
+        rating,
+        reviewText: review.trim(),
+        containsSpoiler,
+      });
+
+      showToast("¡Reseña actualizada con éxito!", "success");
+      onSubmitReview(rating, review);
+      onClose();
+    } catch (error) {
+      console.error("Error updating review:", error);
+      showToast("Error al actualizar la reseña", "error");
+    } finally {
+      setLoadingSubmit(false);
+    }
+  };
+
+  const handleDeleteReview = async () => {
+    setLoadingSubmit(true);
+    try {
+      await deleteReview(existingReview!.id);
+
+      showToast("¡Reseña eliminada con éxito!", "success");
+      onSubmitReview(0, "");
+      onClose();
+    } catch (error) {
+      console.error("Error deleting review:", error);
+      showToast("Error al eliminar la reseña", "error");
+    } finally {
+      setLoadingSubmit(false);
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    setLoadingSubmit(true);
+    try {
+      await createReview({
+        userId,
+        movieId,
+        rating,
+        reviewText: review.trim(),
+        containsSpoiler,
+      });
+
+      showToast("¡Reseña publicada con éxito!", "success");
+      setRating(0);
+      setReview("");
+      setContainsSpoiler(false);
+      setShowReviewInput(false);
+      onSubmitReview(rating, review);
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      showToast("Error al publicar la reseña", "error");
+    } finally {
+      setLoadingSubmit(false);
     }
   };
 
@@ -218,6 +294,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
                   </TouchableOpacity>
                 )}
               </View>
+
               <View style={styles.ratingContainer}>
                 <Text style={styles.sectionTitle}>
                   <Feather
@@ -226,7 +303,9 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
                     color="#FFF"
                     style={styles.sectionIcon}
                   />
-                  Califica esta película
+                  {existingReview
+                    ? "Editar calificación"
+                    : "Califica esta película"}
                 </Text>
                 <View style={styles.starsContainer}>
                   {[1, 2, 3, 4, 5].map((num) => renderStar(num))}
@@ -245,7 +324,8 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
                   </Text>
                 )}
               </View>
-              {showReviewInput && (
+
+              {existingReview ? (
                 <View style={styles.reviewContainer}>
                   <Text style={styles.sectionTitle}>
                     <Feather
@@ -254,7 +334,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
                       color="#FFF"
                       style={styles.sectionIcon}
                     />
-                    Escribe tu reseña
+                    Tu reseña
                   </Text>
 
                   <TextInput
@@ -269,6 +349,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
                     autoCapitalize="sentences"
                     keyboardType="default"
                     returnKeyType="done"
+                    editable={isEditing}
                   />
 
                   <View style={styles.spoilerContainer}>
@@ -289,6 +370,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
                         containsSpoiler && styles.spoilerToggleActive,
                       ]}
                       onPress={() => setContainsSpoiler(!containsSpoiler)}
+                      disabled={!isEditing}
                     >
                       <View
                         style={[
@@ -319,24 +401,184 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
                     </TouchableOpacity>
                   </View>
 
-                  <TouchableOpacity
-                    style={[
-                      styles.submitButton,
-                      (!rating || !review.trim()) &&
-                        styles.submitButtonDisabled,
-                    ]}
-                    onPress={() => onSubmitReview(rating, review)}
-                    disabled={!rating || !review.trim()}
-                  >
-                    <Feather
-                      name="send"
-                      size={20}
-                      color="#FFF"
-                      style={styles.submitIcon}
-                    />
-                    <Text style={styles.submitButtonText}>Publicar reseña</Text>
-                  </TouchableOpacity>
+                  <View style={styles.buttonContainer}>
+                    {isEditing ? (
+                      <>
+                        <TouchableOpacity
+                          style={[
+                            styles.submitButton,
+                            (!rating || !review.trim()) &&
+                              styles.submitButtonDisabled,
+                          ]}
+                          onPress={handleUpdateReview}
+                          disabled={!rating || !review.trim() || loadingSubmit}
+                        >
+                          {loadingSubmit ? (
+                            <ActivityIndicator size="small" color="#FFF" />
+                          ) : (
+                            <>
+                              <Feather
+                                name="edit-2"
+                                size={20}
+                                color="#FFF"
+                                style={styles.submitIcon}
+                              />
+                              <Text style={styles.submitButtonText}>
+                                Actualizar reseña
+                              </Text>
+                            </>
+                          )}
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          style={styles.cancelButton}
+                          onPress={() => setIsEditing(false)}
+                        >
+                          <Feather
+                            name="x-circle"
+                            size={20}
+                            color="#FFF"
+                            style={styles.cancelIcon}
+                          />
+                          <Text style={styles.cancelButtonText}>Cancelar</Text>
+                        </TouchableOpacity>
+                      </>
+                    ) : (
+                      <>
+                        <TouchableOpacity
+                          style={styles.editButton}
+                          onPress={() => setIsEditing(true)}
+                        >
+                          <Feather
+                            name="edit"
+                            size={20}
+                            color="#FFF"
+                            style={styles.editIcon}
+                          />
+                          <Text style={styles.editButtonText}>Editar</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          style={styles.deleteButton}
+                          onPress={handleDeleteReview}
+                          disabled={loadingSubmit}
+                        >
+                          <Feather
+                            name="trash-2"
+                            size={20}
+                            color="#FFF"
+                            style={styles.deleteIcon}
+                          />
+                          <Text style={styles.deleteButtonText}>
+                            Eliminar reseña
+                          </Text>
+                        </TouchableOpacity>
+                      </>
+                    )}
+                  </View>
                 </View>
+              ) : (
+                showReviewInput && (
+                  <View style={styles.reviewContainer}>
+                    <Text style={styles.sectionTitle}>
+                      <Feather
+                        name="edit-3"
+                        size={20}
+                        color="#FFF"
+                        style={styles.sectionIcon}
+                      />
+                      Escribe tu reseña
+                    </Text>
+
+                    <TextInput
+                      style={styles.reviewInput}
+                      placeholder="¿Qué te pareció la película?"
+                      placeholderTextColor="#666"
+                      multiline
+                      numberOfLines={4}
+                      value={review}
+                      onChangeText={setReview}
+                      textAlignVertical="top"
+                      autoCapitalize="sentences"
+                      keyboardType="default"
+                      returnKeyType="done"
+                    />
+
+                    <View style={styles.spoilerContainer}>
+                      <View style={styles.spoilerHeader}>
+                        <Feather
+                          name="alert-triangle"
+                          size={20}
+                          color={containsSpoiler ? colors.magenta : "#666"}
+                        />
+                        <Text style={styles.spoilerHeaderText}>
+                          ¿Tu reseña contiene spoilers?
+                        </Text>
+                      </View>
+
+                      <TouchableOpacity
+                        style={[
+                          styles.spoilerToggle,
+                          containsSpoiler && styles.spoilerToggleActive,
+                        ]}
+                        onPress={() => setContainsSpoiler(!containsSpoiler)}
+                      >
+                        <View
+                          style={[
+                            styles.spoilerIndicator,
+                            containsSpoiler && styles.spoilerIndicatorActive,
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.spoilerStateText,
+                              containsSpoiler && styles.spoilerStateTextActive,
+                            ]}
+                          >
+                            {containsSpoiler ? "SÍ" : "NO"}
+                          </Text>
+                        </View>
+
+                        <Text
+                          style={[
+                            styles.spoilerToggleText,
+                            containsSpoiler && styles.spoilerToggleTextActive,
+                          ]}
+                        >
+                          {containsSpoiler
+                            ? "¡Cuidado! Tu reseña contiene spoilers"
+                            : "Sin spoilers"}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    <TouchableOpacity
+                      style={[
+                        styles.submitButton,
+                        (!rating || !review.trim()) &&
+                          styles.submitButtonDisabled,
+                      ]}
+                      onPress={handleSubmitReview}
+                      disabled={!rating || !review.trim() || loadingSubmit}
+                    >
+                      {loadingSubmit ? (
+                        <ActivityIndicator size="small" color="#FFF" />
+                      ) : (
+                        <>
+                          <Feather
+                            name="send"
+                            size={20}
+                            color="#FFF"
+                            style={styles.submitIcon}
+                          />
+                          <Text style={styles.submitButtonText}>
+                            Publicar reseña
+                          </Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                )
               )}
             </View>
           </TouchableWithoutFeedback>
@@ -441,54 +683,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#222",
     borderRadius: 12,
     padding: 16,
-    color: "#FFF",
+    color: '#FFF',
     height: 120,
     textAlignVertical: "top",
     fontSize: 16,
     borderWidth: 1,
-    borderColor: "#333",
-  },
-  spoilerButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    backgroundColor: "#222",
-    marginTop: 12,
-    alignSelf: "flex-start",
-  },
-  spoilerButtonActive: {
-    backgroundColor: `${colors.magenta}20`,
-  },
-  spoilerText: {
-    color: "#666",
-    marginLeft: 8,
-    fontSize: 14,
-  },
-  spoilerTextActive: {
-    color: colors.magenta,
-  },
-  submitButton: {
-    backgroundColor: colors.magenta,
-    borderRadius: 12,
-    padding: 16,
-    alignItems: "center",
-    marginTop: 20,
-    flexDirection: "row",
-    justifyContent: "center",
-  },
-  submitButtonDisabled: {
-    backgroundColor: "#444",
-    opacity: 0.7,
-  },
-  submitIcon: {
-    marginRight: 8,
-  },
-  submitButtonText: {
-    color: "#FFF",
-    fontSize: 16,
-    fontWeight: "600",
+    borderColor: '#333',
   },
   spoilerContainer: {
     marginTop: 16,
@@ -497,20 +697,17 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
   },
-  
   spoilerHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
   },
-  
   spoilerHeaderText: {
     color: '#FFF',
     fontSize: 16,
     marginLeft: 8,
     fontWeight: '500',
   },
-  
   spoilerToggle: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -518,13 +715,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
   },
-  
   spoilerToggleActive: {
     backgroundColor: `${colors.magenta}15`,
     borderColor: colors.magenta,
     borderWidth: 1,
   },
-  
   spoilerIndicator: {
     backgroundColor: '#444',
     borderRadius: 4,
@@ -532,29 +727,100 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     marginRight: 12,
   },
-  
   spoilerIndicatorActive: {
     backgroundColor: colors.magenta,
   },
-  
   spoilerStateText: {
     color: '#CCC',
     fontSize: 12,
     fontWeight: 'bold',
   },
-  
   spoilerStateTextActive: {
     color: '#FFF',
   },
-  
   spoilerToggleText: {
     color: '#CCC',
     fontSize: 14,
   },
-  
   spoilerToggleTextActive: {
     color: colors.magenta,
   },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  submitButton: {
+    backgroundColor: colors.magenta,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    width: '48%',
+  },
+  submitButtonDisabled: {
+    backgroundColor: '#444',
+    opacity: 0.7,
+  },
+  submitIcon: {
+    marginRight: 8,
+  },
+  submitButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  cancelButton: {
+    backgroundColor: '#666',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    width: '48%',
+  },
+  cancelIcon: {
+    marginRight: 8,
+  },
+  cancelButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  editButton: {
+    backgroundColor: colors.magenta,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    width: '48%',
+  },
+  editIcon: {
+    marginRight: 8,
+  },
+  editButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  deleteButton: {
+    backgroundColor: '#FF3B30',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    width: '48%',
+  },
+  deleteIcon: {
+    marginRight: 8,
+  },
+  deleteButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });
-
 export default ReviewModal;

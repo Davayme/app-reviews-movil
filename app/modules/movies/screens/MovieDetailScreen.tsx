@@ -11,6 +11,7 @@ import { CustomLoading } from '@/app/common/components/Loading/CustomLoading';
 import { DirectorAndCastSection } from '../components/MovieDetails/DirectorAndCastSection';
 import ReviewModal from '../components/MovieDetails/ReviewModal';
 import * as Animatable from 'react-native-animatable';
+import { getUserReviewByMovie } from '../services/reviewService';
 
 type RootStackParamList = {
   MovieDetailScreen: { id: number; userId: number };
@@ -34,12 +35,21 @@ interface Movie {
   img: string;
   poster_path: string;
   runtime: number;
-  score: number | null;
+  score: string | null;
   inWatchlist: boolean;
   viewed: boolean;
   overview: string;
   cast: Person[];
   directors: Person[];
+}
+
+interface UserReview {
+  id: number;
+  rating: number;
+  reviewText: string | null;
+  containsSpoiler: boolean;
+  likesCount: number;
+  createdAt: string;
 }
 
 const MovieDetailScreen: React.FC = () => {
@@ -48,15 +58,20 @@ const MovieDetailScreen: React.FC = () => {
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
   const [isReviewModalVisible, setReviewModalVisible] = useState(false);
+  const [userReview, setUserReview] = useState<UserReview | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
       try {
-        const movieDetails = await getDetailMovie(id, userId);
+        const [movieDetails, review] = await Promise.all([
+          getDetailMovie(id, userId),
+          getUserReviewByMovie(userId, id)
+        ]);
         setMovie(movieDetails);
+        setUserReview(review);
       } catch (error) {
-        console.error('Error fetching movie details:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
@@ -123,8 +138,20 @@ const MovieDetailScreen: React.FC = () => {
           isWatched={movie.viewed}
           onWatchlistToggle={handleWatchlistToggle}
           onWatchedToggle={handleWatchedToggle}
+          existingReview={userReview}
           onSubmitReview={(rating, review) => {
             setReviewModalVisible(false);
+            if (review) {
+              setUserReview({
+                ...userReview,
+                rating,
+                reviewText: review,
+                id: userReview?.id ?? 0,
+                containsSpoiler: userReview?.containsSpoiler ?? false,
+                likesCount: userReview?.likesCount ?? 0,
+                createdAt: userReview?.createdAt ?? new Date().toISOString(),
+              });
+            }
           }}
         />
       )}
