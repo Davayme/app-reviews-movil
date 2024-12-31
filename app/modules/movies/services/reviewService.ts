@@ -81,7 +81,7 @@ export const getUserReviewByMovie = async (userId: number, movieId: number) => {
       const response = await fetch(`${API_URL}/reviews/user/${userId}/movie/${movieId}`);
       if (!response.ok) {
         if (response.status === 404) {
-          return null; // Usuario no tiene reseña para esta película
+          return null;
         }
         throw new Error('Error fetching user review');
       }
@@ -89,17 +89,20 @@ export const getUserReviewByMovie = async (userId: number, movieId: number) => {
       return data;
     } catch (error) {
       console.error('Error getting user review:', error);
-      return null; // Retornamos null en caso de error
+      return null; 
     }
   };
 
 export const getOtherReviewsByMovie = async (movieId: number, userId: number) => {
+    console.log('movieId', movieId, 'userId', userId);
     try {
         const response = await fetch(`${API_URL}/reviews/movie/${movieId}/others/${userId}`);
         if (!response.ok) {
             throw new Error('Error fetching other reviews');
         }
-        return await response.json();
+        const data = await response.json();
+        console.log('data', data);
+        return data;
     } catch (error) {
         console.error('Error getting other reviews:', error);
         throw error;

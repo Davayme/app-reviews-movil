@@ -183,7 +183,7 @@ export const HeaderMovieDetails: React.FC<HeaderMovieDetailsProps> = ({
           </View>
         </LinearGradient>
       </ImageBackground>
-      <ScrollView style={styles.overviewScroll}>
+      <View style={styles.overviewContent}>
         <ExpandableOverview text={movie.overview} />
 
         <View style={styles.genresSection}>
@@ -197,7 +197,7 @@ export const HeaderMovieDetails: React.FC<HeaderMovieDetailsProps> = ({
             ))}
           </View>
         </View>
-      </ScrollView>
+      </View>
     </View>
   );
 };
@@ -214,6 +214,10 @@ const styles = StyleSheet.create({
   gradient: {
     flex: 1,
     justifyContent: "flex-end",
+  },
+  overviewContent: {
+    paddingHorizontal: 16,
+    paddingTop: 20,
   },
   content: {
     paddingHorizontal: 16,

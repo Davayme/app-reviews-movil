@@ -12,6 +12,7 @@ import { DirectorAndCastSection } from '../components/MovieDetails/DirectorAndCa
 import ReviewModal from '../components/MovieDetails/ReviewModal';
 import * as Animatable from 'react-native-animatable';
 import { getUserReviewByMovie } from '../services/reviewService';
+import ListReviews from '../components/MovieDetails/ListReviews';
 
 type RootStackParamList = {
   MovieDetailScreen: { id: number; userId: number };
@@ -124,10 +125,21 @@ const MovieDetailScreen: React.FC = () => {
       <TouchableOpacity style={styles.backButton} onPress={() => router.push('/modules/movies/screens/MainScreen')}>
         <Icon name="arrow-back" size={24} color="#fff" />
       </TouchableOpacity>
-      <ScrollView style={tw`flex-1 bg-black`}>
-        {movie && <HeaderMovieDetails movie={movie} />}
-        {movie && <DirectorAndCastSection cast={movie.cast} directors={movie.directors} />}
-      </ScrollView>
+      <View style={tw`flex-1 bg-black`}>
+      <ScrollView 
+      style={tw`flex-1 bg-black`}
+      showsVerticalScrollIndicator={false}
+    >
+      {movie && (
+        <>
+          <HeaderMovieDetails movie={movie} />
+          <DirectorAndCastSection cast={movie.cast} directors={movie.directors} />
+          <ListReviews movieId={movie.id} userId={userId} />
+        </>
+      )}
+    </ScrollView>
+    </View>
+      
       <Animatable.View
         animation="pulse"
         easing="ease-out"
