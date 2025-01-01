@@ -194,13 +194,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   reviewsSection: {
-    paddingVertical: 16,
+    paddingVertical: 8,
   },
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 16,
-    marginTop: 24,
+    marginTop: 12,
   },
   sectionTitle: {
     color: "#CCC",

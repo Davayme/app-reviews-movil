@@ -94,11 +94,10 @@ export const DirectorAndCastSection: React.FC<CastCrewSectionProps> = ({ cast, d
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'black',
-    paddingBottom: 20,
     marginTop: 20, // Añadir margen superior para separar los componentes
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 16,
   },
   sectionHeader: {
     flexDirection: 'row',
