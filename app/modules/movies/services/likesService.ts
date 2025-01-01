@@ -1,18 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const LIKES_STORAGE_KEY = 'user_likes';
-
-interface UserLikes {
-    [key: number]: number[]; // userId -> reviewIds[]
-}
+const LIKES_STORAGE_KEY = 'user_likes_list';
 
 export const getLikedReviews = async (userId: number): Promise<number[]> => {
     try {
         const storedLikes = await AsyncStorage.getItem(LIKES_STORAGE_KEY);
         if (!storedLikes) return [];
-
-        const userLikes: UserLikes = JSON.parse(storedLikes);
-        return userLikes[userId] || [];
+        return JSON.parse(storedLikes);
     } catch (error) {
         console.error('Error getting liked reviews:', error);
         return [];
@@ -22,15 +16,11 @@ export const getLikedReviews = async (userId: number): Promise<number[]> => {
 export const saveLike = async (userId: number, reviewId: number): Promise<void> => {
     try {
         const storedLikes = await AsyncStorage.getItem(LIKES_STORAGE_KEY);
-        const userLikes: UserLikes = storedLikes ? JSON.parse(storedLikes) : {};
-
-        if (!userLikes[userId]) {
-            userLikes[userId] = [];
-        }
-
-        if (!userLikes[userId].includes(reviewId)) {
-            userLikes[userId].push(reviewId);
-            await AsyncStorage.setItem(LIKES_STORAGE_KEY, JSON.stringify(userLikes));
+        const likedReviews: number[] = storedLikes ? JSON.parse(storedLikes) : [];
+        
+        if (!likedReviews.includes(reviewId)) {
+            likedReviews.push(reviewId);
+            await AsyncStorage.setItem(LIKES_STORAGE_KEY, JSON.stringify(likedReviews));
         }
     } catch (error) {
         console.error('Error saving like:', error);
@@ -42,12 +32,9 @@ export const removeLike = async (userId: number, reviewId: number): Promise<void
         const storedLikes = await AsyncStorage.getItem(LIKES_STORAGE_KEY);
         if (!storedLikes) return;
 
-        const userLikes: UserLikes = JSON.parse(storedLikes);
-        
-        if (userLikes[userId]) {
-            userLikes[userId] = userLikes[userId].filter(id => id !== reviewId);
-            await AsyncStorage.setItem(LIKES_STORAGE_KEY, JSON.stringify(userLikes));
-        }
+        const likedReviews: number[] = JSON.parse(storedLikes);
+        const updatedLikes = likedReviews.filter(id => id !== reviewId);
+        await AsyncStorage.setItem(LIKES_STORAGE_KEY, JSON.stringify(updatedLikes));
     } catch (error) {
         console.error('Error removing like:', error);
     }

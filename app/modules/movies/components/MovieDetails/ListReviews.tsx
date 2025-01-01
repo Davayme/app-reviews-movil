@@ -154,12 +154,12 @@ const ListReviews: React.FC<{ movieId: number; userId: number }> = ({
         const [userRev, otherRevs, userLikes] = await Promise.all([
           getUserReviewByMovie(userId, movieId),
           getOtherReviewsByMovie(movieId, userId),
-          getLikedReviews(userId),
+          getLikedReviews(userId) // Esta función ahora obtiene los likes desde AsyncStorage
         ]);
 
         setUserReview(userRev);
         setOtherReviews(otherRevs);
-        setLikedReviews(new Set(userLikes));
+        setLikedReviews(new Set(userLikes)); // userLikes es un array de IDs
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -172,17 +172,20 @@ const ListReviews: React.FC<{ movieId: number; userId: number }> = ({
 
   const handleLike = async (reviewId: number, isLiked: boolean) => {
     try {
-      // Primero actualizar el estado local (optimistic update)
+      // Actualizar estado local primero (optimistic update)
       setLikedReviews((prev) => {
         const newLikedReviews = new Set(prev);
         if (isLiked) {
           newLikedReviews.delete(reviewId);
+          removeLike(userId, reviewId); // Actualizar AsyncStorage
         } else {
           newLikedReviews.add(reviewId);
+          saveLike(userId, reviewId); // Actualizar AsyncStorage
         }
         return newLikedReviews;
       });
 
+      // Actualizar UI
       setOtherReviews((prevReviews) =>
         prevReviews.map((review) =>
           review.id === reviewId
@@ -191,27 +194,20 @@ const ListReviews: React.FC<{ movieId: number; userId: number }> = ({
         )
       );
 
-      // Luego actualizar el servidor
-      if (isLiked) {
-        await removeLike(userId, reviewId);
-      } else {
-        await saveLike(userId, reviewId);
-      }
-
-      // Finalmente actualizar el conteo en el servidor
       await updateLikes({
         reviewId,
         action: isLiked ? "decrement" : "increment",
       });
     } catch (error) {
-      // Revertir cambios en caso de error
       console.error("Error updating like:", error);
       setLikedReviews((prev) => {
         const newLikedReviews = new Set(prev);
         if (isLiked) {
           newLikedReviews.add(reviewId);
+          saveLike(userId, reviewId); // Revertir en AsyncStorage
         } else {
           newLikedReviews.delete(reviewId);
+          removeLike(userId, reviewId); // Revertir en AsyncStorage
         }
         return newLikedReviews;
       });
