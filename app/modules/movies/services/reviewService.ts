@@ -14,6 +14,11 @@ interface UpdateReviewDto {
     containsSpoiler?: boolean;
 }
 
+interface UpdateLikesDto {
+    reviewId: number;
+    action: 'increment' | 'decrement';
+}
+
 export const createReview = async (reviewData: CreateReviewDto) => {
     try {
         const response = await fetch(`${API_URL}/reviews`, {
@@ -105,6 +110,36 @@ export const getOtherReviewsByMovie = async (movieId: number, userId: number) =>
         return data;
     } catch (error) {
         console.error('Error getting other reviews:', error);
+        throw error;
+    }
+};
+
+export const updateLikes = async (updateLikesData: UpdateLikesDto) => {
+    try {
+        const response = await fetch(`${API_URL}/reviews/likes`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updateLikesData),
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Error updating likes:', error);
+        throw error;
+    }
+};
+
+export const getUserReviewsWithMovies = async (userId: number) => {
+    try {
+        const response = await fetch(`${API_URL}/reviews/movies/user/${userId}`);
+        if (!response.ok) {
+            throw new Error('Error fetching user reviews with movies');
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching user reviews with movies:', error);
         throw error;
     }
 };

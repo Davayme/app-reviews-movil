@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
   ActivityIndicator,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
@@ -12,7 +11,13 @@ import { colors } from "@/app/common/utils/constants";
 import {
   getUserReviewByMovie,
   getOtherReviewsByMovie,
+  updateLikes,
 } from "../../services/reviewService";
+import {
+  getLikedReviews,
+  saveLike,
+  removeLike,
+} from "../../services/likesService";
 
 interface User {
   id: number;
@@ -34,15 +39,32 @@ interface Review {
 interface ReviewCardProps {
   review: Review;
   onLike: () => void;
+  isUserReview?: boolean;
+  likedReviews: Set<number>;
+  setLikedReviews: React.Dispatch<React.SetStateAction<Set<number>>>;
 }
 
-const ReviewCard: React.FC<ReviewCardProps> = ({ review, onLike }) => {
+const ReviewCard: React.FC<ReviewCardProps> = ({
+  review,
+  onLike,
+  isUserReview = false,
+  likedReviews,
+  setLikedReviews,
+}) => {
   const [showSpoiler, setShowSpoiler] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const isLiked = likedReviews.has(review.id);
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    onLike();
+  const handleLike = async () => {
+    if (isUserReview || isLoading) return;
+    setIsLoading(true);
+    try {
+      await onLike();
+    } catch (error) {
+      console.error("Error updating like:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -59,16 +81,25 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, onLike }) => {
             </Text>
           </View>
         </View>
-        <View style={styles.rating}>
-          {[...Array(5)].map((_, i) => (
-            <Feather
-              key={i}
-              name="star"
-              size={16}
-              color={i < review.rating ? colors.yellow : "#666"}
-            />
-          ))}
-        </View>
+        <TouchableOpacity
+          style={[styles.likeButton, isUserReview && styles.disabledLikeButton]}
+          onPress={handleLike}
+          disabled={isUserReview}
+        >
+          <Feather
+            name="heart"
+            size={24}
+            color={isUserReview ? "#666" : isLiked ? colors.magenta : "#666"}
+          />
+          <Text
+            style={[
+              styles.likeCount,
+              !isUserReview && isLiked && styles.likedText,
+            ]}
+          >
+            {review.likesCount}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {review.containsSpoiler ? (
@@ -78,7 +109,12 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, onLike }) => {
             onPress={() => setShowSpoiler(!showSpoiler)}
           >
             <Feather name="alert-triangle" size={20} color={colors.magenta} />
-            <Text style={styles.spoilerText}>
+            <Text
+              style={[
+                styles.spoilerText,
+                showSpoiler && styles.revealedSpoilerText,
+              ]}
+            >
               {showSpoiler
                 ? review.reviewText
                 : "Esta reseña contiene spoilers. Toca para mostrar."}
@@ -89,16 +125,16 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, onLike }) => {
         <Text style={styles.reviewText}>{review.reviewText}</Text>
       )}
 
-      <TouchableOpacity style={styles.likeButton} onPress={handleLike}>
-        <Feather
-          name="heart"
-          size={24} // Aumentar el tamaño del icono
-          color={isLiked ? colors.magenta : "#666"}
-        />
-        <Text style={[styles.likeCount, isLiked && styles.likedText]}>
-          {review.likesCount}
-        </Text>
-      </TouchableOpacity>
+      <View style={styles.ratingContainer}>
+        {[...Array(5)].map((_, i) => (
+          <Feather
+            key={i}
+            name="star"
+            size={16}
+            color={i < review.rating ? colors.yellow : "#666"}
+          />
+        ))}
+      </View>
     </View>
   );
 };
@@ -110,25 +146,85 @@ const ListReviews: React.FC<{ movieId: number; userId: number }> = ({
   const [userReview, setUserReview] = useState<Review | null>(null);
   const [otherReviews, setOtherReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+  const [likedReviews, setLikedReviews] = useState<Set<number>>(new Set());
 
   useEffect(() => {
-    const fetchReviews = async () => {
+    const fetchData = async () => {
       try {
-        const [userRev, otherRevs] = await Promise.all([
+        const [userRev, otherRevs, userLikes] = await Promise.all([
           getUserReviewByMovie(userId, movieId),
           getOtherReviewsByMovie(movieId, userId),
+          getLikedReviews(userId),
         ]);
+
         setUserReview(userRev);
         setOtherReviews(otherRevs);
+        setLikedReviews(new Set(userLikes));
       } catch (error) {
-        console.error("Error fetching reviews:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchReviews();
+    fetchData();
   }, [movieId, userId]);
+
+  const handleLike = async (reviewId: number, isLiked: boolean) => {
+    try {
+      // Primero actualizar el estado local (optimistic update)
+      setLikedReviews((prev) => {
+        const newLikedReviews = new Set(prev);
+        if (isLiked) {
+          newLikedReviews.delete(reviewId);
+        } else {
+          newLikedReviews.add(reviewId);
+        }
+        return newLikedReviews;
+      });
+
+      setOtherReviews((prevReviews) =>
+        prevReviews.map((review) =>
+          review.id === reviewId
+            ? { ...review, likesCount: review.likesCount + (isLiked ? -1 : 1) }
+            : review
+        )
+      );
+
+      // Luego actualizar el servidor
+      if (isLiked) {
+        await removeLike(userId, reviewId);
+      } else {
+        await saveLike(userId, reviewId);
+      }
+
+      // Finalmente actualizar el conteo en el servidor
+      await updateLikes({
+        reviewId,
+        action: isLiked ? "decrement" : "increment",
+      });
+    } catch (error) {
+      // Revertir cambios en caso de error
+      console.error("Error updating like:", error);
+      setLikedReviews((prev) => {
+        const newLikedReviews = new Set(prev);
+        if (isLiked) {
+          newLikedReviews.add(reviewId);
+        } else {
+          newLikedReviews.delete(reviewId);
+        }
+        return newLikedReviews;
+      });
+
+      setOtherReviews((prevReviews) =>
+        prevReviews.map((review) =>
+          review.id === reviewId
+            ? { ...review, likesCount: review.likesCount + (isLiked ? 1 : -1) }
+            : review
+        )
+      );
+    }
+  };
 
   if (loading) {
     return (
@@ -149,7 +245,10 @@ const ListReviews: React.FC<{ movieId: number; userId: number }> = ({
             </View>
             <ReviewCard
               review={userReview}
-              onLike={() => console.log("Like review:", userReview.id)}
+              onLike={() => {}}
+              isUserReview={true}
+              likedReviews={likedReviews}
+              setLikedReviews={setLikedReviews}
             />
           </>
         )}
@@ -164,7 +263,11 @@ const ListReviews: React.FC<{ movieId: number; userId: number }> = ({
               <ReviewCard
                 key={review.id}
                 review={review}
-                onLike={() => console.log("Like review:", review.id)}
+                onLike={() =>
+                  handleLike(review.id, likedReviews.has(review.id))
+                }
+                likedReviews={likedReviews}
+                setLikedReviews={setLikedReviews}
               />
             ))}
           </>
@@ -213,6 +316,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
+    position: "relative",
   },
   header: {
     flexDirection: "row",
@@ -247,9 +351,9 @@ const styles = StyleSheet.create({
     color: "#666",
     fontSize: 12,
   },
-  rating: {
+  ratingContainer: {
     flexDirection: "row",
-    gap: 4,
+    marginTop: 12,
   },
   reviewText: {
     color: "#FFF",
@@ -262,7 +366,7 @@ const styles = StyleSheet.create({
   spoilerButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: `${colors.magenta}15`,
+    backgroundColor: "#333", // Cambiar el fondo a un color más neutro
     padding: 12,
     borderRadius: 8,
   },
@@ -271,10 +375,18 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     flex: 1,
   },
+  revealedSpoilerText: {
+    color: "#FFF",
+  },
   likeButton: {
+    position: "absolute",
+    top: 16,
+    right: 16,
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 12,
+  },
+  disabledLikeButton: {
+    opacity: 0.7,
   },
   likeCount: {
     color: "#666",
