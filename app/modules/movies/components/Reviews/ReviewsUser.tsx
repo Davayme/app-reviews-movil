@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { getUserReviewsWithMovies } from "../../services/reviewService";
 import { colors } from "@/app/common/utils/constants";
 import { FilterReviews } from "./FilterReviews"; // Importar el componente
@@ -155,6 +155,23 @@ const ReviewsUser: React.FC<{ userId: number }> = ({ userId }) => {
     );
   }
 
+  if (reviews.length === 0) {
+    return (
+      <View style={[styles.emptyContainer, styles.padding]}>
+        <MaterialIcons name="rate-review" size={48} color={colors.gris} />
+        <Text style={[styles.emptyText, styles.marginTop]}>
+          No has hecho ninguna reseña todavía
+        </Text>
+        <TouchableOpacity
+          style={[styles.refreshButton, { backgroundColor: colors.yellow }]}
+          onPress={fetchReviews}
+        >
+          <Text style={styles.refreshButtonText}>Actualizar</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <View style={{ flex: 1 }}>
       <View style={styles.header}>
@@ -182,6 +199,34 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 16,
     paddingBottom: 8,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors['background-color'],
+  },
+  padding: {
+    padding: 16,
+  },
+  emptyText: {
+    color: colors.gris,
+    fontSize: 18,
+    textAlign: 'center',
+    marginTop: 16,
+  },
+  refreshButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 24,
+    marginTop: 16,
+  },
+  refreshButtonText: {
+    fontWeight: 'bold',
+    color: colors['background-color'],
+  },
+  marginTop: {
+    marginTop: 16,
   },
   headerLeft: {
     flexDirection: "row",
