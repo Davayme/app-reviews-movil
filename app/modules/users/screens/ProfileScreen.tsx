@@ -6,6 +6,7 @@ import { getUserProfile } from '../services/userService';
 import { useAuth } from '@/app/modules/auth/hooks/useAuth';
 import { colors } from '@/app/common/utils/constants';
 import { UserProfile } from '../services/userService';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const ProfileScreen: React.FC = () => {
   const { user } = useAuth();
@@ -40,14 +41,19 @@ const ProfileScreen: React.FC = () => {
   return (
     <ScrollView style={styles.container}>
       {userProfile && (
-        <>
+        <LinearGradient
+          colors={['rgba(16, 204, 208, 0.1)', 'rgba(231, 87, 147, 0.1)']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.gradientContainer}
+        >
           <UserProfileInfo
             displayName={userProfile.name}
             email={userProfile.email}
             createdAt={userProfile.createdAt}
           />
           <UserStats reviews={userProfile.reviews} watchlist={userProfile.watchlist} />
-        </>
+        </LinearGradient>
       )}
     </ScrollView>
   );
@@ -57,7 +63,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors['background-color'],
-    padding: 16,
+  },
+  gradientContainer: {
+    margin: 16,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(31, 31, 31, 0.7)',
   },
   loadingContainer: {
     flex: 1,

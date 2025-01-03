@@ -1,5 +1,6 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, Animated } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { colors } from '@/app/common/utils/constants';
 
 interface UserInfoProps {
@@ -9,67 +10,119 @@ interface UserInfoProps {
 }
 
 const UserProfileInfo: React.FC<UserInfoProps> = ({ displayName, email, createdAt }) => {
+  const opacity = new Animated.Value(0);
+  const translateY = new Animated.Value(20);
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(translateY, {
+        toValue: 0,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
   const getInitials = (name: string) => {
     const initials = name.split(' ').map((word) => word[0]).join('');
     return initials.toUpperCase();
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.avatar}>
-        <Text style={styles.avatarText}>{getInitials(displayName)}</Text>
+    <Animated.View style={[styles.container, { opacity, transform: [{ translateY }] }]}>
+      <View style={styles.content}>
+        <View style={styles.avatarContainer}>
+          <View style={styles.avatarGradient}>
+            <Text style={styles.avatarText}>{getInitials(displayName)}</Text>
+          </View>
+        </View>
+        
+        <View style={styles.info}>
+          <View style={styles.nameContainer}>
+            <MaterialIcons name="person" size={24} color={colors.yellow} />
+            <Text style={styles.displayName}>{displayName || 'Usuario desconocido'}</Text>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <MaterialIcons name="email" size={20} color={colors.magenta} />
+            <Text style={styles.infoText}>{email}</Text>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <MaterialIcons name="date-range" size={20} color={colors.azul} />
+            <Text style={styles.infoText}>
+              Miembro desde {new Date(createdAt).toLocaleDateString()}
+            </Text>
+          </View>
+        </View>
       </View>
-      <View style={styles.info}>
-        <Text style={styles.displayName}>{displayName || 'Usuario desconocido'}</Text>
-        <Text style={styles.email}>{email}</Text>
-        <Text style={styles.createdAt}>Cuenta creada el: {new Date(createdAt).toLocaleDateString()}</Text>
-      </View>
-    </View>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#1b1b1b',
-    padding: 16,
-    borderRadius: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
+    overflow: 'hidden',
   },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: colors.yellow,
+  content: {
+    padding: 20,
+    zIndex: 1,
+  },
+  avatarContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  avatarGradient: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    padding: 3,
+    backgroundColor: 'rgba(31, 31, 31, 0.7)',
   },
   avatarText: {
-    color: '#fff',
-    fontSize: 32,
+    position: 'absolute',
+    color: colors.white,
+    fontSize: 40,
     fontWeight: 'bold',
+    backgroundColor: colors['background-color'],
+    width: '100%',
+    height: '100%',
+    textAlign: 'center',
+    lineHeight: 100, // Mismo valor que height para centrar verticalmente
+    borderRadius: 50,
   },
   info: {
-    flex: 1,
+    gap: 16,
+  },
+  nameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   displayName: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: colors.yellow,
+    color: colors.cyan,
   },
-  email: {
-    color: '#ccc',
-    marginTop: 4,
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
-  createdAt: {
-    color: '#ccc',
-    marginTop: 4,
+  infoText: {
+    color: colors.white,
+    fontSize: 16,
+    flex: 1,
   },
 });
 

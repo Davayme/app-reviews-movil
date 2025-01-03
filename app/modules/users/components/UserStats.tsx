@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, Image, Animated, Dimensions } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
-import { FontAwesome } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { colors } from '@/app/common/utils/constants';
 
 interface UserStatsProps {
@@ -10,13 +10,30 @@ interface UserStatsProps {
 }
 
 const UserStats: React.FC<UserStatsProps> = ({ reviews = [], watchlist = [] }) => {
+  const opacity = new Animated.Value(0);
+  const translateY = new Animated.Value(20);
+  const screenWidth = Dimensions.get('window').width;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(translateY, {
+        toValue: 0,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
   const totalReviews = reviews.length;
   const averageRating = totalReviews > 0 
     ? (reviews.reduce((acc, review) => acc + review.rating, 0) / totalReviews).toFixed(1)
     : 'N/A';
-
   const totalWatchlist = watchlist.length;
-
   const lastReview = totalReviews > 0 ? reviews[0] : null;
   const lastWatchlist = totalWatchlist > 0 ? watchlist[0] : null;
 
@@ -26,180 +43,212 @@ const UserStats: React.FC<UserStatsProps> = ({ reviews = [], watchlist = [] }) =
   }, Array(5).fill(0));
 
   const barData = {
-    labels: ['1 estrella', '2 estrellas', '3 estrellas', '4 estrellas', '5 estrellas'],
-    datasets: [
-      {
-        data: ratingDistribution,
-        colors: [
-          () => colors.magenta,
-          () => colors.azul,
-          () => colors.yellow,
-          () => colors.green,
-          () => colors.cyan,
-        ],
-      },
-    ],
+    labels: ['1★', '2★', '3★', '4★', '5★'],
+    datasets: [{ data: ratingDistribution }],
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Estadísticas del Usuario</Text>
-      <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <FontAwesome name="comment-o" size={32} color={colors.yellow} />
-          <Text style={styles.statTitle}>Total de Reseñas</Text>
-          <Text style={styles.statValue}>{totalReviews}</Text>
-        </View>
-        <View style={styles.statCard}>
-          <FontAwesome name="clipboard" size={32} color={colors.yellow} />
-          <Text style={styles.statTitle}>Películas en Watchlist</Text>
-          <Text style={styles.statValue}>{totalWatchlist}</Text>
-        </View>
-        <View style={styles.statCard}>
-          <FontAwesome name="star" size={32} color={colors.yellow} />
-          <Text style={styles.statTitle}>Calificación Promedio</Text>
-          <Text style={styles.statValue}>{averageRating}</Text>
-        </View>
-      </View>
-      <View style={styles.lastItemsContainer}>
-        <View style={styles.lastItemCard}>
-          <Image
-            source={{ uri: lastReview?.movie?.posterPath ? `https://image.tmdb.org/t/p/w200${lastReview.movie.posterPath}` : 'https://via.placeholder.com/100x150?text=No+Image' }}
-            style={styles.lastItemImage}
-          />
-          <View>
-            <Text style={styles.lastItemTitle}>Última Reseña</Text>
-            <Text style={styles.lastItemText}>{lastReview?.movie?.title || 'No hay reseñas recientes'}</Text>
+    <Animated.View style={[styles.container, { opacity, transform: [{ translateY }] }]}>
+      <View style={styles.gradientContainer}>
+        <Text style={styles.title}>Estadísticas del Usuario</Text>
+
+        <View style={styles.statsContainer}>
+          <View style={styles.statCard}>
+            <MaterialIcons name="rate-review" size={32} color={colors.yellow} />
+            <Text style={styles.statTitle}>Reseñas</Text>
+            <Text style={styles.statValue}>{totalReviews}</Text>
+          </View>
+
+          <View style={styles.statCard}>
+            <MaterialIcons name="playlist-add-check" size={32} color={colors.magenta} />
+            <Text style={styles.statTitle}>Watchlist</Text>
+            <Text style={styles.statValue}>{totalWatchlist}</Text>
+          </View>
+
+          <View style={styles.statCard}>
+            <MaterialIcons name="star" size={32} color={colors.azul} />
+            <Text style={styles.statTitle}>Promedio</Text>
+            <Text style={styles.statValue}>{averageRating}</Text>
           </View>
         </View>
-        <View style={styles.lastItemCard}>
-          <Image
-            source={{ uri: lastWatchlist?.movie?.posterPath ? `https://image.tmdb.org/t/p/w200${lastWatchlist.movie.posterPath}` : 'https://via.placeholder.com/100x150?text=No+Image' }}
-            style={styles.lastItemImage}
-          />
-          <View>
-            <Text style={styles.lastItemTitle}>Última Película en Watchlist</Text>
-            <Text style={styles.lastItemText}>{lastWatchlist?.movie?.title || 'No hay películas en la watchlist'}</Text>
-          </View>
+
+        <View style={styles.moviesSection}>
+          {lastReview && (
+            <View style={styles.movieCard}>
+              <Image
+                source={{
+                  uri: lastReview.movie.posterPath 
+                    ? `https://image.tmdb.org/t/p/w200${lastReview.movie.posterPath}`
+                    : 'https://via.placeholder.com/100x150?text=No+Image'
+                }}
+                style={styles.moviePoster}
+              />
+              <View style={styles.movieInfo}>
+                <Text style={styles.movieLabel}>Última Reseña</Text>
+                <Text numberOfLines={2} style={styles.movieTitle}>
+                  {lastReview.movie.title}
+                </Text>
+                <View style={styles.ratingContainer}>
+                  <MaterialIcons name="star" size={16} color={colors.yellow} />
+                  <Text style={styles.ratingText}>{lastReview.rating}</Text>
+                </View>
+              </View>
+            </View>
+          )}
+
+          {lastWatchlist && (
+            <View style={styles.movieCard}>
+              <Image
+                source={{
+                  uri: lastWatchlist.movie.posterPath 
+                    ? `https://image.tmdb.org/t/p/w200${lastWatchlist.movie.posterPath}`
+                    : 'https://via.placeholder.com/100x150?text=No+Image'
+                }}
+                style={styles.moviePoster}
+              />
+              <View style={styles.movieInfo}>
+                <Text style={styles.movieLabel}>Último en Watchlist</Text>
+                <Text numberOfLines={2} style={styles.movieTitle}>
+                  {lastWatchlist.movie.title}
+                </Text>
+              </View>
+            </View>
+          )}
         </View>
+
+        {totalReviews > 0 && (
+          <View style={styles.chartContainer}>
+            <Text style={styles.chartTitle}>Distribución de Calificaciones</Text>
+            <BarChart
+              data={barData}
+              width={screenWidth - 64}
+              height={220}
+              yAxisLabel=""
+              yAxisSuffix=""
+              chartConfig={{
+                backgroundColor: 'transparent',
+                backgroundGradientFrom: 'transparent',
+                backgroundGradientTo: 'transparent',
+                decimalPlaces: 0,
+                color: (opacity = 1) => `rgba(252, 189, 0, ${opacity})`,
+                labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                style: { borderRadius: 16 },
+                barPercentage: 0.7,
+              }}
+              style={styles.chart}
+              showValuesOnTopOfBars={true}
+              fromZero={true}
+            />
+          </View>
+        )}
       </View>
-      <View style={styles.chartContainer}>
-        <Text style={styles.chartTitle}>Distribución de Calificaciones</Text>
-        <BarChart
-          data={barData}
-          width={320}
-          height={220}
-          yAxisLabel=""
-          yAxisSuffix=""
-          chartConfig={{
-            backgroundColor: '#1b1b1b',
-            backgroundGradientFrom: '#1b1b1b',
-            backgroundGradientTo: '#1b1b1b',
-            decimalPlaces: 1,
-            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            style: {
-              borderRadius: 16,
-            },
-            propsForDots: {
-              r: '6',
-              strokeWidth: '2',
-              stroke: '#ffa726',
-            },
-          }}
-          style={{
-            marginVertical: 8,
-            borderRadius: 16,
-          }}
-        />
-      </View>
-    </View>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#1b1b1b',
-    padding: 16,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-    marginBottom: 16,
+    overflow: 'hidden',
+  },
+  gradientContainer: {
+    padding: 20,
+    backgroundColor: 'transparent',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: colors.yellow,
+    color: colors.cyan,
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 20,
+    gap: 12,
   },
   statCard: {
-    backgroundColor: '#2b2b2b',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
     flex: 1,
-    marginHorizontal: 4,
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+    backgroundColor: 'rgba(31, 31, 31, 0.7)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   statTitle: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: colors.yellow,
+    color: colors.white,
     marginTop: 8,
   },
   statValue: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: colors.cyan,
     marginTop: 4,
   },
-  lastItemsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 16,
+  moviesSection: {
+    gap: 12,
+    marginBottom: 20,
   },
-  lastItemCard: {
-    backgroundColor: '#2b2b2b',
-    padding: 16,
+  movieCard: {
+    flexDirection: 'row',
     borderRadius: 12,
-    flexDirection: 'row',
+    padding: 12,
     alignItems: 'center',
-    flex: 1,
-    marginHorizontal: 4,
+    backgroundColor: 'rgba(31, 31, 31, 0.7)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
-  lastItemImage: {
+  moviePoster: {
     width: 60,
     height: 90,
     borderRadius: 8,
-    marginRight: 16,
   },
-  lastItemTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: colors.yellow,
+  movieInfo: {
+    flex: 1,
+    marginLeft: 16,
   },
-  lastItemText: {
+  movieLabel: {
     fontSize: 14,
     color: colors.cyan,
-    marginTop: 4,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  movieTitle: {
+    fontSize: 16,
+    color: colors.white,
+    fontWeight: '500',
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  ratingText: {
+    color: colors.white,
+    marginLeft: 4,
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   chartContainer: {
-    marginTop: 16,
+    alignItems: 'center',
+    backgroundColor: 'rgba(31, 31, 31, 0.7)',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   chartTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: colors.cyan,
-    textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 16,
+  },
+  chart: {
+    borderRadius: 16,
+    paddingRight: 0,
   },
 });
 
