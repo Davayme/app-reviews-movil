@@ -77,6 +77,11 @@ export default function RootLayout() {
                 name="modules/movies/screens/MovieDetailScreen"
                 options={{ headerShown: false }}
               />
+               <Stack.Screen
+                name="modules/users/screens/ProfileScreen"
+                options={{ title: "Mi perfil" }}
+              />
+
             </Stack>
           </ReviewProvider>
         </WatchlistProvider>

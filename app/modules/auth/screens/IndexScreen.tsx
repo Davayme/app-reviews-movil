@@ -27,10 +27,10 @@ export default function IndexScreen() {
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 2000,
-      useNativeDriver: false, // Cambiado a false para evitar la advertencia
+      useNativeDriver: false, 
     }).start();
 
-    // Llamar al servicio de películas y obtener los paths de los posters
+   
     const fetchMovies = async () => {
       try {
         const posterPaths: string[] = await getPopularMovies();

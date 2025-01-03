@@ -49,7 +49,11 @@ export default function HomeTab() {
     }).start();
   }, []);
 
-  const updateMovieInList = async (movieId: number, inWatchlist: boolean, fromCarousel: "popular" | "nowPlaying") => {
+  const updateMovieInList = async (
+    movieId: number,
+    inWatchlist: boolean,
+    fromCarousel: "popular" | "nowPlaying"
+  ) => {
     toggleWatchlist(movieId);
 
     // Siempre recargar el otro carrusel
@@ -84,8 +88,12 @@ export default function HomeTab() {
       style={[tw`flex-1`, { backgroundColor: "#1b1b1b", opacity: fadeAnim }]}
       showsVerticalScrollIndicator={false}
     >
-      <View style={tw`flex-row items-center mb-4 px-4`}>
-        <MaterialIcons name="local-fire-department" size={24} color={colors.yellow} />
+      <View style={[tw`flex-row items-center mb-4 px-4`, { marginTop: 10 }]}>
+        <MaterialIcons
+          name="local-fire-department"
+          size={24}
+          color={colors.yellow}
+        />
         <Text style={[tw`text-xl font-bold ml-2`, { color: colors.yellow }]}>
           Películas Populares
         </Text>
@@ -97,7 +105,9 @@ export default function HomeTab() {
           userId={user?.id || 1}
           initialMovies={popularMovies}
           fetchMovies={getPopularMovies}
-          onWatchlistChange={(movieId, inWatchlist) => updateMovieInList(movieId, inWatchlist, "popular")}
+          onWatchlistChange={(movieId, inWatchlist) =>
+            updateMovieInList(movieId, inWatchlist, "popular")
+          }
         />
       )}
 
@@ -114,7 +124,9 @@ export default function HomeTab() {
           userId={user?.id || 1}
           initialMovies={nowPlayingMovies}
           fetchMovies={getNowPlayingMovies}
-          onWatchlistChange={(movieId, inWatchlist) => updateMovieInList(movieId, inWatchlist, "nowPlaying")}
+          onWatchlistChange={(movieId, inWatchlist) =>
+            updateMovieInList(movieId, inWatchlist, "nowPlaying")
+          }
         />
       )}
     </Animated.ScrollView>

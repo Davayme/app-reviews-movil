@@ -9,5 +9,7 @@ export const colors = {
     azulClaro: '#4dd0e1',
     gris: '#9e9e9e',
     'background-color': '#1b1b1b',
-    white : '#fff'
+    white : '#fff',
+    cyan : '#00bcd4',
+    green : '#4caf50'
 };
