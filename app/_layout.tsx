@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Stack } from "expo-router";
 import { DefaultTheme } from "@react-navigation/native";
+import { StatusBar } from 'expo-status-bar'; // Importar StatusBar
 import { ToastProvider } from "./common/components/Toast/ToastProvider";
 import { HeaderRight } from "./common/components/Header/HeaderRight";
 import { AuthProvider } from "./modules/auth/context/AuthContext";
@@ -20,6 +21,7 @@ export default function RootLayout() {
   const [isSearchModalVisible, setIsSearchModalVisible] = useState(false);
   return (
     <ToastProvider>
+      <StatusBar style="light" backgroundColor={customTheme.colors.background} />
       <AuthProvider>
         <WatchlistProvider>
           <SearchModal
@@ -29,7 +31,7 @@ export default function RootLayout() {
           <Stack
             screenOptions={{
               headerStyle: {
-                backgroundColor: "#1b1b1b",
+                backgroundColor: customTheme.colors.background,
               },
               headerTintColor: "#ffffff",
               headerTitleStyle: {
@@ -54,7 +56,7 @@ export default function RootLayout() {
                 headerBackVisible: false,
                 headerLeft: () => null,
                 headerStyle: {
-                  backgroundColor: "#1b1b1b",
+                  backgroundColor: customTheme.colors.background,
                 },
                 headerTintColor: "#ffffff",
                 headerTitleStyle: {
