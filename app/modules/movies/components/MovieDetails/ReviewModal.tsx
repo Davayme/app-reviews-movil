@@ -25,7 +25,7 @@ import {
   deleteReview,
   updateReview,
 } from "../../services/reviewService";
-
+import { BackHandler } from 'react-native';
 const { height } = Dimensions.get("window");
 
 interface ReviewModalProps {
@@ -90,6 +90,14 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
       setContainsSpoiler(existingReview?.containsSpoiler || false);
       setIsEditing(false);
       setShowReviewInput(!!existingReview);
+      const backHandler = BackHandler.addEventListener(
+        'hardwareBackPress',
+        () => {
+          onClose();
+          return true;
+        }
+      );
+      return () => backHandler.remove();
     } else {
       resetStates();
     }

@@ -231,13 +231,16 @@ const styles = StyleSheet.create({
     padding: 4,
     flex: 1,
     marginRight: 12,
+    justifyContent: "space-between", // Distribuir espacio equitativamente
   },
   filterButton: {
+    flex: 1, // Hacer que cada botón ocupe el mismo espacio
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center", // Centrar contenido
     marginHorizontal: 2,
   },
   iconMargin: {
