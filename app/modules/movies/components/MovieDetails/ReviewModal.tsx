@@ -117,7 +117,6 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
     setLoadingWatchlist(true);
     try {
       if (localIsInWatchlist) {
-        // Primero actualizar estado de vista si es necesario
         if (localIsWatched) {
           await updateMovieViewedStatus({
             userId,

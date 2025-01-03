@@ -210,10 +210,10 @@ export const SearchModal: React.FC<SearchModalProps> = ({
       transparent
     >
       <View style={[tw`flex-1`, { backgroundColor: "rgba(0,0,0,0.9)" }]}>
-        {/* Header */}
+  
         <View
           style={[
-            tw`px-4 py-3 flex-row items-center mt-8`, // Agregado mt-8
+            tw`px-4 py-3 flex-row items-center mt-8`, 
             { backgroundColor: "rgba(32, 32, 32, 0.95)" },
           ]}
         >
@@ -244,7 +244,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({
           </View>
         </View>
 
-        {/* Content */}
         {isLoading ? (
           <View style={tw`flex-1 justify-center items-center`}>
             <ActivityIndicator size="large" color={colors.yellow} />

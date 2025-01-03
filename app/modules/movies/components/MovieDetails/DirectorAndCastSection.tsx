@@ -50,7 +50,6 @@ export const DirectorAndCastSection: React.FC<CastCrewSectionProps> = ({ cast, d
 
   return (
     <View style={styles.container}>
-      {/* Sección DIRECTORES */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Feather name="user" size={16} color="#CCC" />
@@ -69,7 +68,6 @@ export const DirectorAndCastSection: React.FC<CastCrewSectionProps> = ({ cast, d
         )}
       </View>
 
-      {/* Sección CAST */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Feather name="users" size={16} color="#CCC" />

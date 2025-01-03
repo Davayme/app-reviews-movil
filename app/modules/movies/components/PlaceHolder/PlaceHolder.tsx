@@ -31,7 +31,6 @@ const SkeletonPlaceholder = () => {
         <Animated.View style={[styles.textPlaceholder, { opacity: fadeAnim }]} />
         <Animated.View style={[styles.textPlaceholder, { opacity: fadeAnim }]} />
       </View>
-      {/* Add more placeholders as needed */}
     </View>
   );
 };
