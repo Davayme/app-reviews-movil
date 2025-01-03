@@ -26,6 +26,7 @@ import {
   updateReview,
 } from "../../services/reviewService";
 import { BackHandler } from 'react-native';
+import { useReviewContext } from "../../context/ReviewContext";
 const { height } = Dimensions.get("window");
 
 interface ReviewModalProps {
@@ -82,6 +83,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
   );
   const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const { triggerRefresh } = useReviewContext();
 
   useEffect(() => {
     if (isVisible) {
@@ -158,9 +160,9 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
       });
 
       showToast("¡Reseña actualizada con éxito!", "success");
-      // Pasar la reseña actualizada completa
       onSubmitReview(rating, review, updatedReview);
       resetStates();
+      triggerRefresh();
       onClose();
     } catch (error) {
       console.error("Error updating review:", error);
@@ -177,9 +179,9 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
     try {
       await deleteReview(existingReview.id);
       showToast("¡Reseña eliminada con éxito!", "success");
-      // Enviar null como newReview para indicar eliminación
       onSubmitReview(0, "", null);
       resetStates();
+      triggerRefresh();
       onClose();
     } catch (error) {
       console.error("Error deleting review:", error);
@@ -202,8 +204,9 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
 
       const newReview = await createReview(reviewData);
       showToast("¡Reseña publicada con éxito!", "success");
-      onSubmitReview(rating, review, newReview); // Esto forzará la recarga
+      onSubmitReview(rating, review, newReview);
       resetStates();
+      triggerRefresh(); 
       onClose();
     } catch (error) {
       console.error("Error submitting review:", error);

@@ -16,6 +16,7 @@ import { useNavigation } from "expo-router";
 import { NavigationProp } from "@react-navigation/native";
 import { RootStackParamList } from "../../context/RootStack";
 import { useAuth } from "@/app/modules/auth/hooks/useAuth";
+import { useReviewContext } from "../../context/ReviewContext";
 
 interface Movie {
   title: string;
@@ -113,20 +114,22 @@ const ReviewCard: React.FC<{ review: Review }> = ({ review }) => {
 const ReviewsUser: React.FC<{ userId: number }> = ({ userId }) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+  const { addRefreshListener } = useReviewContext();
 
+  const fetchReviews = async () => {
+    try {
+      const userReviews = await getUserReviewsWithMovies(userId);
+      setReviews(userReviews);
+    } catch (error) {
+      console.error("Error fetching user reviews:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        const userReviews = await getUserReviewsWithMovies(userId);
-        setReviews(userReviews);
-      } catch (error) {
-        console.error("Error fetching user reviews:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchReviews();
+    const unsubscribe = addRefreshListener(fetchReviews);
+    return () => unsubscribe();
   }, [userId]);
 
   const handleFilter = (order: "asc" | "desc") => {
