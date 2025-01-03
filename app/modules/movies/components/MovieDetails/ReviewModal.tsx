@@ -129,7 +129,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
 
   const handleUpdateReview = async () => {
     if (!existingReview || existingReview.id === 0) return;
-    
+
     setLoadingSubmit(true);
     try {
       const updatedReview = await updateReview(existingReview.id, {
@@ -137,7 +137,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
         reviewText: review.trim(),
         containsSpoiler,
       });
-  
+
       showToast("¡Reseña actualizada con éxito!", "success");
       // Pasar la reseña actualizada completa
       onSubmitReview(rating, review, updatedReview);
@@ -150,10 +150,10 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
       setLoadingSubmit(false);
     }
   };
-  
+
   const handleDeleteReview = async () => {
     if (!existingReview || existingReview.id === 0) return;
-    
+
     setLoadingSubmit(true);
     try {
       await deleteReview(existingReview.id);
@@ -169,7 +169,6 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
       setLoadingSubmit(false);
     }
   };
-  
 
   const handleSubmitReview = async () => {
     setLoadingSubmit(true);
@@ -181,7 +180,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
         reviewText: review.trim(),
         containsSpoiler,
       };
-  
+
       const newReview = await createReview(reviewData);
       showToast("¡Reseña publicada con éxito!", "success");
       onSubmitReview(rating, review, newReview); // Esto forzará la recarga
@@ -585,7 +584,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
 
                     <TouchableOpacity
                       style={[
-                        styles.submitButton,
+                        styles.fullWidthSubmitButton,
                         (!rating || !review.trim()) &&
                           styles.submitButtonDisabled,
                       ]}
@@ -641,6 +640,16 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     alignSelf: "center",
     marginBottom: 20,
+  },
+  fullWidthSubmitButton: {
+    backgroundColor: colors.magenta,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    width: "100%",
+    marginTop: 20,
   },
   actionButtons: {
     flexDirection: "row",
