@@ -7,11 +7,11 @@ import {
   ActivityIndicator,
   StatusBar,
   TouchableOpacity,
+  StyleSheet,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { colors } from "@/app/common/utils/constants";
 import { useAuth } from "@/app/modules/auth/hooks/useAuth";
-import tw from "tailwind-react-native-classnames";
 import { CardWatchlistMovie } from "./CardWatchlistMovie";
 import { useWatchlist } from "../../context/WatchlistContextGlobal";
 import { SortWatchlist } from "./SortWatchlist";
@@ -42,20 +42,23 @@ export const ListWatchlist = () => {
     setSortedMovies(sorted);
   };
 
-  const sortMovies = (moviesToSort: any[], type: 'title' | 'date', order: 'asc' | 'desc') => {
+  const sortMovies = (
+    moviesToSort: any[],
+    type: "title" | "date",
+    order: "asc" | "desc"
+  ) => {
     return [...moviesToSort].sort((a, b) => {
-      if (type === 'title') {
-        return order === 'asc'
+      if (type === "title") {
+        return order === "asc"
           ? a.movie.title.localeCompare(b.movie.title)
           : b.movie.title.localeCompare(a.movie.title);
       } else {
         const dateA = new Date(a.movie.createdAt).getTime();
         const dateB = new Date(b.movie.createdAt).getTime();
-        return order === 'asc' ? dateA - dateB : dateB - dateA;
+        return order === "asc" ? dateA - dateB : dateB - dateA;
       }
     });
   };
-
 
   useEffect(() => {
     silentlyRefetchWatchlist();
@@ -67,7 +70,7 @@ export const ListWatchlist = () => {
 
   if (isRefetching && movies.length === 0) {
     return (
-      <View style={tw`flex-1 justify-center items-center`}>
+      <View style={styles.centered}>
         <ActivityIndicator size="large" color={colors.yellow} />
       </View>
     );
@@ -75,19 +78,27 @@ export const ListWatchlist = () => {
 
   if (movies.length === 0) {
     return (
-      <View style={tw`flex-1 justify-center items-center p-4`}>
+      <View style={[styles.centered, styles.padding]}>
         <MaterialIcons name="movie" size={48} color={colors.gris} />
-        <Text style={[tw`text-center mt-4 text-lg`, { color: colors.gris }]}>
+        <Text
+          style={[
+            styles.textCenter,
+            styles.marginTop,
+            styles.textLg,
+            { color: colors.gris },
+          ]}
+        >
           No hay películas en tu watchlist
         </Text>
         <TouchableOpacity
           style={[
-            tw`mt-4 px-6 py-3 rounded-full`,
+            styles.marginTop,
+            styles.button,
             { backgroundColor: colors.yellow },
           ]}
           onPress={onRefresh}
         >
-          <Text style={tw`font-bold`}>Actualizar</Text>
+          <Text style={styles.fontBold}>Actualizar</Text>
         </TouchableOpacity>
       </View>
     );
@@ -104,7 +115,7 @@ export const ListWatchlist = () => {
   }) => (
     <TouchableOpacity
       style={[
-        tw`px-4 py-2 rounded-full flex-row items-center`,
+        styles.filterButton,
         filter === value && { backgroundColor: colors.magenta },
       ]}
       onPress={() => setFilter(value)}
@@ -113,11 +124,11 @@ export const ListWatchlist = () => {
         name={icon as keyof typeof MaterialIcons.glyphMap}
         size={16}
         color={filter === value ? "#fff" : colors.gris}
-        style={tw`mr-2`}
+        style={styles.iconMargin}
       />
       <Text
         style={[
-          tw`font-medium`,
+          styles.fontMedium,
           { color: filter === value ? "#fff" : colors.gris },
         ]}
       >
@@ -127,31 +138,22 @@ export const ListWatchlist = () => {
   );
 
   return (
-    <View style={[tw`flex-1`, { backgroundColor: colors["background-color"] }]}>
+    <View
+      style={[styles.flex1, { backgroundColor: colors["background-color"] }]}
+    >
       <StatusBar
         backgroundColor={colors["background-color"]}
         barStyle="light-content"
       />
 
-      <View style={tw`px-4 py-6`}>
-        <View style={tw`flex-row items-center`}>
-          <View
-            style={[
-              tw`flex-row rounded-full p-1`,
-              { backgroundColor: "rgba(255,255,255,0.1)" },
-            ]}
-          >
-            <FilterButton label="Todas" value="all" icon="local-movies" />
-            <FilterButton
-              label="Pendientes"
-              value="pending"
-              icon="watch-later"
-            />
-            <FilterButton label="Vistas" value="viewed" icon="done-all" />
-          </View>
-          <View style={tw`ml-2`}>
-            <SortWatchlist onSort={handleSort} />
-          </View>
+      <View style={styles.header}>
+        <View style={styles.filterContainer}>
+          <FilterButton label="Todas" value="all" icon="local-movies" />
+          <FilterButton label="Pendientes" value="pending" icon="watch-later" />
+          <FilterButton label="Vistas" value="viewed" icon="done-all" />
+        </View>
+        <View style={styles.sortContainer}>
+          <SortWatchlist onSort={handleSort} />
         </View>
       </View>
 
@@ -170,9 +172,9 @@ export const ListWatchlist = () => {
         )}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
-        contentContainerStyle={tw`px-4 pt-2 pb-6`}
-        columnWrapperStyle={tw`justify-between`}
-        ItemSeparatorComponent={() => <View style={{ height: 16 }} />}
+        contentContainerStyle={styles.listContent}
+        columnWrapperStyle={styles.columnWrapper}
+        ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -185,3 +187,79 @@ export const ListWatchlist = () => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  flex1: {
+    flex: 1,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  padding: {
+    padding: 16,
+  },
+  textCenter: {
+    textAlign: "center",
+  },
+  marginTop: {
+    marginTop: 16,
+  },
+  textLg: {
+    fontSize: 18,
+  },
+  button: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 24,
+  },
+  fontBold: {
+    fontWeight: "bold",
+  },
+  header: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  filterContainer: {
+    flexDirection: "row",
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderRadius: 24,
+    padding: 4,
+    flex: 1,
+    marginRight: 12,
+  },
+  filterButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 2,
+  },
+  iconMargin: {
+    marginRight: 6,
+  },
+  fontMedium: {
+    fontWeight: "500",
+    fontSize: 13, // Reducir tamaño de fuente
+  },
+  sortContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  listContent: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 24,
+  },
+  columnWrapper: {
+    justifyContent: "space-between",
+  },
+  itemSeparator: {
+    height: 16,
+  },
+});
