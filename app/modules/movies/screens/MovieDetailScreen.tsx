@@ -74,7 +74,7 @@ const MovieDetailScreen: React.FC = () => {
           getUserReviewByMovie(userId, id),
         ]);
         setMovie(movieDetails);
-        setUserReview(review || null); // Asegurarse de que review sea null si no existe
+        setUserReview(review || null); 
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -87,10 +87,20 @@ const MovieDetailScreen: React.FC = () => {
 
   const handleWatchlistToggle = () => {
     if (movie) {
-      setMovie({
-        ...movie,
-        inWatchlist: !movie.inWatchlist,
-      });
+      // Si se está quitando de watchlist y está vista, actualizar ambos estados
+      if (movie.inWatchlist && movie.viewed) {
+        setMovie({
+          ...movie,
+          inWatchlist: false,
+          viewed: false,
+        });
+      } else {
+        // Si no, solo actualizar watchlist
+        setMovie({
+          ...movie,
+          inWatchlist: !movie.inWatchlist,
+        });
+      }
     }
   };
 
@@ -117,7 +127,6 @@ const MovieDetailScreen: React.FC = () => {
     } else {
       setUserReview(null);
     }
-    // Forzar recarga de ListReviews
     setReviewsKey((prev) => prev + 1);
   };
 

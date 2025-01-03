@@ -1,11 +1,16 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import tw from 'tailwind-react-native-classnames';
+import ReviewsUser from './ReviewsUser'; // Importar el componente
+import { useAuth } from '@/app/modules/auth/hooks/useAuth'; // Importar useAuth
+
 
 export default function ReviewsTab() {
+  const { user } = useAuth(); // Obtener el usuario logueado
+
   return (
-    <View style={[tw`flex-1 p-4`, { backgroundColor: '#1b1b1b' }]}>
-      <Text style={[tw`text-lg`, { color: '#ffffff' }]}>Mis reviews</Text>
-    </View>
+    <View style={[tw`flex-1`, { backgroundColor: '#1b1b1b' }]}>
+    <ReviewsUser userId={user!.id} />
+  </View>
   );
 }
