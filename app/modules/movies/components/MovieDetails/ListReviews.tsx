@@ -18,6 +18,7 @@ import {
   saveLike,
   removeLike,
 } from "../../services/likesService";
+import ReviewModal from "./ReviewModal"; // Importar el componente ReviewModal
 
 interface User {
   id: number;
@@ -49,7 +50,6 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
   onLike,
   isUserReview = false,
   likedReviews,
-  setLikedReviews,
 }) => {
   const [showSpoiler, setShowSpoiler] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -147,6 +147,7 @@ const ListReviews: React.FC<{ movieId: number; userId: number }> = ({
   const [otherReviews, setOtherReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [likedReviews, setLikedReviews] = useState<Set<number>>(new Set());
+  const [isReviewModalVisible, setIsReviewModalVisible] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -222,6 +223,33 @@ const ListReviews: React.FC<{ movieId: number; userId: number }> = ({
     }
   };
 
+  const handleReviewSubmit = async (
+    rating: number,
+    reviewText?: string,
+    newReview?: Review | null
+  ) => {
+    if (newReview) {
+      setUserReview(newReview);
+      setOtherReviews(prev =>
+        prev.filter(r => r.id !== newReview.id)
+      );
+    } else {
+      setUserReview(null);
+    }
+  
+    try {
+      // Recargar la reseña de usuario y las otras reseñas
+      const [updatedUserReview, updatedOtherReviews] = await Promise.all([
+        getUserReviewByMovie(userId, movieId),
+        getOtherReviewsByMovie(movieId, userId),
+      ]);
+      setUserReview(updatedUserReview);
+      setOtherReviews(updatedOtherReviews);
+    } catch (error) {
+      console.error("Error recargando reseñas:", error);
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -278,6 +306,22 @@ const ListReviews: React.FC<{ movieId: number; userId: number }> = ({
           </View>
         )}
       </View>
+
+      <ReviewModal
+        isVisible={isReviewModalVisible}
+        onClose={() => setIsReviewModalVisible(false)}
+        isInWatchlist={false}
+        isWatched={false}
+        onWatchlistToggle={() => {}}
+        onWatchedToggle={() => {}}
+        onSubmitReview={handleReviewSubmit}
+        userId={userId}
+        movieId={movieId}
+        movieTitle=""
+        posterPath=""
+        releaseDate=""
+        existingReview={null}
+      />
     </View>
   );
 };

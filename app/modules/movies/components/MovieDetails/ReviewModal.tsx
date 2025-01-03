@@ -128,21 +128,19 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
   };
 
   const handleUpdateReview = async () => {
-    console.log("Actualizando reseña:", existingReview);
-    if (!existingReview || existingReview.id === 0) {
-      console.log("No se puede actualizar: existingReview no válido");
-      return;
-    }
+    if (!existingReview || existingReview.id === 0) return;
+    
     setLoadingSubmit(true);
     try {
-      await updateReview(existingReview.id, {
+      const updatedReview = await updateReview(existingReview.id, {
         rating,
         reviewText: review.trim(),
         containsSpoiler,
       });
   
       showToast("¡Reseña actualizada con éxito!", "success");
-      onSubmitReview(rating, review);
+      // Pasar la reseña actualizada completa
+      onSubmitReview(rating, review, updatedReview);
       resetStates();
       onClose();
     } catch (error) {
@@ -154,16 +152,14 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
   };
   
   const handleDeleteReview = async () => {
-    console.log("Eliminando reseña:", existingReview);
-    if (!existingReview || existingReview.id === 0) {
-      console.log("No se puede eliminar: existingReview no válido");
-      return;
-    }
+    if (!existingReview || existingReview.id === 0) return;
+    
     setLoadingSubmit(true);
     try {
       await deleteReview(existingReview.id);
       showToast("¡Reseña eliminada con éxito!", "success");
-      onSubmitReview(0, "");
+      // Enviar null como newReview para indicar eliminación
+      onSubmitReview(0, "", null);
       resetStates();
       onClose();
     } catch (error) {
@@ -174,25 +170,21 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
     }
   };
   
-  
 
   const handleSubmitReview = async () => {
     setLoadingSubmit(true);
     try {
       const reviewData = {
-        userId: Number(userId), // Asegurarse de que userId sea un número
+        userId: Number(userId),
         movieId,
         rating,
         reviewText: review.trim(),
         containsSpoiler,
       };
   
-      console.log("Enviando datos de reseña:", reviewData); // Agregar log para verificar los datos
-  
       const newReview = await createReview(reviewData);
-  
       showToast("¡Reseña publicada con éxito!", "success");
-      onSubmitReview(rating, review, newReview); // Pasar la nueva reseña al componente padre
+      onSubmitReview(rating, review, newReview); // Esto forzará la recarga
       resetStates();
       onClose();
     } catch (error) {

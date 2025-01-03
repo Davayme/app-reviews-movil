@@ -1,24 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
-import { HeaderMovieDetails } from '../components/MovieDetails/HeaderMovieDetails';
-import { getDetailMovie } from '../services/movieService';
-import { RouteProp, useRoute } from '@react-navigation/native';
-import { colors } from '@/app/common/utils/constants';
-import tw from 'tailwind-react-native-classnames';
-import Icon from 'react-native-vector-icons/Ionicons';
+import React, { useEffect, useState } from "react";
+import { View, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import { HeaderMovieDetails } from "../components/MovieDetails/HeaderMovieDetails";
+import { getDetailMovie } from "../services/movieService";
+import { RouteProp, useRoute } from "@react-navigation/native";
+import { colors } from "@/app/common/utils/constants";
+import tw from "tailwind-react-native-classnames";
+import Icon from "react-native-vector-icons/Ionicons";
 import { useRouter } from "expo-router";
-import { CustomLoading } from '@/app/common/components/Loading/CustomLoading';
-import { DirectorAndCastSection } from '../components/MovieDetails/DirectorAndCastSection';
-import ReviewModal from '../components/MovieDetails/ReviewModal';
-import * as Animatable from 'react-native-animatable';
-import { getUserReviewByMovie } from '../services/reviewService';
-import ListReviews from '../components/MovieDetails/ListReviews';
+import { CustomLoading } from "@/app/common/components/Loading/CustomLoading";
+import { DirectorAndCastSection } from "../components/MovieDetails/DirectorAndCastSection";
+import ReviewModal from "../components/MovieDetails/ReviewModal";
+import * as Animatable from "react-native-animatable";
+import { getUserReviewByMovie } from "../services/reviewService";
+import ListReviews from "../components/MovieDetails/ListReviews";
 
 type RootStackParamList = {
   MovieDetailScreen: { id: number; userId: number };
 };
 
-type MovieDetailScreenRouteProp = RouteProp<RootStackParamList, 'MovieDetailScreen'>;
+type MovieDetailScreenRouteProp = RouteProp<
+  RootStackParamList,
+  "MovieDetailScreen"
+>;
 
 interface Person {
   id: number;
@@ -60,6 +63,7 @@ const MovieDetailScreen: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isReviewModalVisible, setReviewModalVisible] = useState(false);
   const [userReview, setUserReview] = useState<UserReview | null>(null);
+  const [reviewsKey, setReviewsKey] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -67,17 +71,17 @@ const MovieDetailScreen: React.FC = () => {
       try {
         const [movieDetails, review] = await Promise.all([
           getDetailMovie(id, userId),
-          getUserReviewByMovie(userId, id)
+          getUserReviewByMovie(userId, id),
         ]);
         setMovie(movieDetails);
         setUserReview(review || null); // Asegurarse de que review sea null si no existe
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
-  
+
     fetchMovieDetails();
   }, [id, userId]);
 
@@ -103,43 +107,50 @@ const MovieDetailScreen: React.FC = () => {
     return <CustomLoading />;
   }
 
-  const handleReviewSubmit = (rating: number, review?: string, newReview?: any) => {
+  const handleReviewSubmit = (
+    rating: number,
+    review?: string,
+    newReview?: any
+  ) => {
     if (newReview) {
       setUserReview(newReview);
-    } else if (review) {
-      setUserReview({
-        id: userReview?.id ?? 0,
-        rating,
-        reviewText: review,
-        containsSpoiler: userReview?.containsSpoiler ?? false,
-        likesCount: userReview?.likesCount ?? 0,
-        createdAt: userReview?.createdAt ?? new Date().toISOString(),
-      });
     } else {
-      setUserReview(null); // Eliminar la reseña del estado
+      setUserReview(null);
     }
+    // Forzar recarga de ListReviews
+    setReviewsKey((prev) => prev + 1);
   };
-  
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => router.push('/modules/movies/screens/MainScreen')}>
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => router.push("/modules/movies/screens/MainScreen")}
+      >
         <Icon name="arrow-back" size={24} color="#fff" />
       </TouchableOpacity>
       <View style={tw`flex-1 bg-black`}>
-      <ScrollView 
-      style={tw`flex-1 bg-black`}
-      showsVerticalScrollIndicator={false}
-    >
-      {movie && (
-        <>
-          <HeaderMovieDetails movie={movie} />
-          <DirectorAndCastSection cast={movie.cast} directors={movie.directors} />
-          <ListReviews movieId={movie.id} userId={userId} />
-        </>
-      )}
-    </ScrollView>
-    </View>
-      
+        <ScrollView
+          style={tw`flex-1 bg-black`}
+          showsVerticalScrollIndicator={false}
+        >
+          {movie && (
+            <>
+              <HeaderMovieDetails movie={movie} />
+              <DirectorAndCastSection
+                cast={movie.cast}
+                directors={movie.directors}
+              />
+              <ListReviews
+                key={reviewsKey}
+                movieId={movie.id}
+                userId={userId}
+              />
+            </>
+          )}
+        </ScrollView>
+      </View>
+
       <Animatable.View
         animation="pulse"
         easing="ease-out"
@@ -178,24 +189,24 @@ const MovieDetailScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors['background-color'],
+    backgroundColor: colors["background-color"],
   },
   backButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 40,
     left: 20,
     zIndex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     borderRadius: 20,
     padding: 10,
   },
   floatingButtonContainer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 30,
     right: 30,
   },
   floatingButton: {
-    backgroundColor: colors['magenta'],
+    backgroundColor: colors["magenta"],
     borderRadius: 50,
     padding: 15,
     elevation: 5,

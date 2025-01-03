@@ -99,45 +99,41 @@ export const CardMovie: React.FC<CardMovieProps> = ({
       return (
         <View style={[tw`flex-row items-center`, { gap: 4 }]}>
           <MaterialIcons name="star-outline" size={16} color={colors.gris} />
-          <Text style={[tw`text-xs`, { color: colors.gris }]}>
-            Sin calificación
-          </Text>
+          <Text style={[tw`text-xs`, { color: colors.gris }]}>Sin calificación</Text>
         </View>
       );
     }
-
-    const rating = (movie.vote_average / 2).toFixed(1);
+  
+    const rating = movie.vote_average.toFixed(1);
     const ratingNumber = Number(rating);
     const stars = [];
-
+  
+    // Para ratings de 1-5
     for (let i = 1; i <= 5; i++) {
       if (i <= Math.floor(ratingNumber)) {
         stars.push(
-          <MaterialIcons key={i} name="star" size={16} color={colors.magenta} />
+          <MaterialIcons key={i} name="star" size={16} color={colors.yellow} />
         );
-      } else if (i === Math.ceil(ratingNumber) && ratingNumber % 1 !== 0) {
+      } else if (i === Math.ceil(ratingNumber) && ratingNumber % 1 >= 0.5) {
         stars.push(
-          <MaterialIcons
-            key={i}
-            name="star-half"
-            size={16}
-            color={colors.magenta}
-          />
+          <MaterialIcons key={i} name="star-half" size={16} color={colors.yellow} />
         );
       } else {
         stars.push(
-          <MaterialIcons
-            key={i}
-            name="star-outline"
-            size={16}
-            color={colors.magentaLight}
-          />
+          <MaterialIcons key={i} name="star-outline" size={16} color={colors.yellow} />
         );
       }
     }
-    return <View style={[tw`flex-row items-center`, { gap: 2 }]}>{stars}</View>;
+  
+    return (
+      <View style={[tw`flex-row items-center`, { gap: 4 }]}>
+        <View style={[tw`flex-row items-center`, { gap: 1 }]}>{stars}</View>
+        <Text style={[tw`text-xs font-medium`, { color: colors.yellow }]}>
+          ({rating})
+        </Text>
+      </View>
+    );
   };
-
   return (
     <TouchableOpacity
       onPress={() => setShowModal(true)}
