@@ -10,6 +10,8 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors } from '../../utils/constants';
 import { useRouter } from 'expo-router';
+import { useAuth } from '@/app/modules/auth/hooks/useAuth';
+import { useToast } from '../Toast/useToast';
 
 interface HeaderRightProps {
   onSearchPress: () => void;
@@ -18,7 +20,9 @@ interface HeaderRightProps {
 export const HeaderRight: React.FC<HeaderRightProps> = ({ onSearchPress }) => {
   const [menuVisible, setMenuVisible] = useState(false);
   const router = useRouter();
-  
+  const { signOut } = useAuth();
+  const { showToast } = useToast();
+
   const toggleMenu = () => {
     setMenuVisible(!menuVisible);
   };
@@ -29,6 +33,17 @@ export const HeaderRight: React.FC<HeaderRightProps> = ({ onSearchPress }) => {
       toggleMenu();
     } catch (error) {
       console.error("Error navigating to profile:", error);
+      showToast('Error al cerrar sesión', 'error');
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toggleMenu();
+    } catch (error) {
+   
+      console.error('Error logging out:', error);
     }
   };
 
@@ -55,7 +70,7 @@ export const HeaderRight: React.FC<HeaderRightProps> = ({ onSearchPress }) => {
                   <Text style={styles.menuItemText}>Mi perfil</Text>
                 </TouchableOpacity>
                 <View style={styles.divider} />
-                <TouchableOpacity style={styles.menuItem}>
+                <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
                   <MaterialIcons name="logout" size={20} color={colors.magenta} />
                   <Text style={[styles.menuItemText, { color: colors.magenta }]}>
                     Cerrar sesión
