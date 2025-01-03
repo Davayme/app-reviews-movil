@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,13 +7,14 @@ import {
   ScrollView,
   ActivityIndicator,
   SafeAreaView,
+  StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
-import tw from "tailwind-react-native-classnames";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { registerUser } from "../services/authServices";
 import { colors } from "../../../common/utils/constants";
 import { MaterialIcons } from "@expo/vector-icons";
+
 export default function RegisterScreen() {
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const router = useRouter();
@@ -23,6 +24,7 @@ export default function RegisterScreen() {
     password: { value: "", error: "" },
   });
   const [loading, setLoading] = useState(false);
+
   const getFocusedStyle = (fieldName: string, color: string) => ({
     backgroundColor: "#2d2d2d",
     color: "#fff",
@@ -34,6 +36,7 @@ export default function RegisterScreen() {
     shadowRadius: 8,
     elevation: focusedInput === fieldName ? 4 : 0,
   });
+
   const validateField = (name: string, value: string) => {
     let error = "";
 
@@ -96,134 +99,102 @@ export default function RegisterScreen() {
   };
 
   return (
-    <SafeAreaView
-      style={[tw`flex-1`, { backgroundColor: colors["background-color"] }]}
-    >
+    <SafeAreaView style={[styles.flex1, { backgroundColor: colors["background-color"] }]}>
       <ScrollView
-        contentContainerStyle={tw`flex-1 justify-center`}
+        contentContainerStyle={styles.scrollViewContent}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={tw`px-6 py-8 mt-6`}>
-          <View style={tw`mb-12`}>
-            <Text
-              style={tw`text-4xl font-bold text-center mb-2 text-yellow-400`}
-            >
-              CineScore
-            </Text>
-            <Text style={[tw`text-lg text-center`, { color: colors.azul }]}>
-              Crear nueva cuenta
-            </Text>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <Text style={styles.title}>CineScore</Text>
+            <Text style={styles.subtitle}>Crear nueva cuenta</Text>
           </View>
-          <View style={tw`space-y-8`}>
+          <View style={styles.form}>
             {/* Input Nombre */}
             <View>
-              <Text style={tw`text-white text-sm mb-3 ml-1`}>Nombre</Text>
-              <View style={tw`relative`}>
-                <View
-                  style={tw`absolute inset-y-0 left-0 pl-4 flex items-center justify-center`}
-                >
-                  <MaterialIcons
-                    name="person"
-                    size={18}
-                    color={colors.yellow}
-                  />
-                </View>
-                <TextInput
-                  style={[
-                    tw`w-full rounded-xl pl-12 pr-4 py-4 text-base border`,
-                    getFocusedStyle("name", "#fcbd00"),
-                  ]}
-                  placeholder="Tu nombre"
-                  placeholderTextColor="#9ca3af"
-                  value={formData.name.value}
-                  onChangeText={(text) => handleChange("name", text)}
-                  onFocus={() => setFocusedInput("name")}
-                  onBlur={() => setFocusedInput(null)}
-                />
+              <View style={styles.inputLabelContainer}>
+                <MaterialIcons name="person" size={18} color={colors.yellow} style={styles.icon} />
+                <Text style={styles.inputLabel}>Nombre</Text>
               </View>
+              <TextInput
+                style={[
+                  styles.input,
+                  getFocusedStyle("name", "#fcbd00"),
+                ]}
+                placeholder="Tu nombre"
+                placeholderTextColor="#9ca3af"
+                value={formData.name.value}
+                onChangeText={(text) => handleChange("name", text)}
+                onFocus={() => setFocusedInput("name")}
+                onBlur={() => setFocusedInput(null)}
+              />
               {formData.name.error && (
-                <Text style={tw`mt-2 text-red-400 text-sm ml-1`}>
+                <Text style={styles.errorText}>
                   {formData.name.error}
                 </Text>
               )}
             </View>
 
-            {/* Input Email - similar adjustments */}
+            {/* Input Email */}
             <View>
-              <Text style={tw`text-white text-sm mb-3 ml-1`}>
-                Correo electrónico
-              </Text>
-              <View style={tw`relative`}>
-                <View
-                  style={tw`absolute inset-y-0 left-0 pl-4 flex items-center justify-center`}
-                >
-                  <MaterialIcons name="email" size={18} color={colors.azul} />
-                </View>
-                <TextInput
-                  style={[
-                    tw`w-full rounded-xl pl-12 pr-4 py-4 text-base border`,
-                    getFocusedStyle("email", "#10ccd0"),
-                  ]}
-                  placeholder="correo@ejemplo.com"
-                  placeholderTextColor="#9ca3af"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  value={formData.email.value}
-                  onChangeText={(text) => handleChange("email", text)}
-                  onFocus={() => setFocusedInput("email")}
-                  onBlur={() => setFocusedInput(null)}
-                />
+              <View style={styles.inputLabelContainer}>
+                <MaterialIcons name="email" size={18} color={colors.azul} style={styles.icon} />
+                <Text style={styles.inputLabel}>Correo electrónico</Text>
               </View>
+              <TextInput
+                style={[
+                  styles.input,
+                  getFocusedStyle("email", "#10ccd0"),
+                ]}
+                placeholder="correo@ejemplo.com"
+                placeholderTextColor="#9ca3af"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={formData.email.value}
+                onChangeText={(text) => handleChange("email", text)}
+                onFocus={() => setFocusedInput("email")}
+                onBlur={() => setFocusedInput(null)}
+              />
               {formData.email.error && (
-                <Text style={tw`mt-2 text-red-400 text-sm ml-1`}>
+                <Text style={styles.errorText}>
                   {formData.email.error}
                 </Text>
               )}
             </View>
 
-            {/* Input Password - similar adjustments */}
+            {/* Input Password */}
             <View>
-              <Text style={tw`text-white text-sm mb-3 ml-1`}>Contraseña</Text>
-              <View style={tw`relative`}>
-                <View
-                  style={tw`absolute inset-y-0 left-0 pl-4 flex items-center justify-center`}
-                >
-                  <MaterialIcons name="lock" size={18} color={colors.magenta} />
-                </View>
-                <TextInput
-                  style={[
-                    tw`w-full rounded-xl pl-12 pr-4 py-4 text-base border`,
-                    getFocusedStyle("password", "#e75793"),
-                  ]}
-                  placeholder="Mínimo 6 caracteres"
-                  placeholderTextColor="#9ca3af"
-                  secureTextEntry
-                  value={formData.password.value}
-                  onChangeText={(text) => handleChange("password", text)}
-                  onFocus={() => setFocusedInput("password")}
-                  onBlur={() => setFocusedInput(null)}
-                />
+              <View style={styles.inputLabelContainer}>
+                <MaterialIcons name="lock" size={18} color={colors.magenta} style={styles.icon} />
+                <Text style={styles.inputLabel}>Contraseña</Text>
               </View>
+              <TextInput
+                style={[
+                  styles.input,
+                  getFocusedStyle("password", "#e75793"),
+                ]}
+                placeholder="Mínimo 6 caracteres"
+                placeholderTextColor="#9ca3af"
+                secureTextEntry
+                value={formData.password.value}
+                onChangeText={(text) => handleChange("password", text)}
+                onFocus={() => setFocusedInput("password")}
+                onBlur={() => setFocusedInput(null)}
+              />
               {formData.password.error && (
-                <Text style={tw`mt-2 text-red-400 text-sm ml-1`}>
+                <Text style={styles.errorText}>
                   {formData.password.error}
                 </Text>
               )}
             </View>
 
-            <View style={tw`mt-12 mb-8 space-y-6`}>
+            <View style={styles.buttonContainer}>
               {/* Botón Registrarse */}
               <TouchableOpacity
                 style={[
-                  tw`w-full rounded-2xl py-4 px-6`,
+                  styles.registerButton,
                   {
-                    backgroundColor: colors.azul,
                     opacity: !isFormValid() ? 0.5 : 1,
-                    shadowColor: colors.azul,
-                    shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: 0.3,
-                    shadowRadius: 5,
-                    elevation: 6,
                   },
                 ]}
                 onPress={handleRegister}
@@ -232,14 +203,14 @@ export default function RegisterScreen() {
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <View style={tw`flex-row items-center justify-center`}>
+                  <View style={styles.buttonContent}>
                     <Icon
                       name="user-plus"
                       size={20}
                       color="#fff"
-                      style={tw`mr-2`}
+                      style={styles.buttonIcon}
                     />
-                    <Text style={tw`text-center text-white text-lg font-bold`}>
+                    <Text style={styles.buttonText}>
                       Crear cuenta
                     </Text>
                   </View>
@@ -248,28 +219,17 @@ export default function RegisterScreen() {
 
               {/* Botón Ya tengo cuenta */}
               <TouchableOpacity
-                style={[
-                  tw`w-full rounded-2xl py-4 px-6 border-2 mt-4`,
-                  {
-                    borderColor: colors.magenta,
-                    backgroundColor: "rgba(231, 87, 147, 0.1)",
-                  },
-                ]}
+                style={styles.loginButton}
                 onPress={() => router.push("/modules/auth/screens/LoginScreen")}
               >
-                <View style={tw`flex-row items-center justify-center`}>
+                <View style={styles.buttonContent}>
                   <Icon
                     name="sign-in"
                     size={20}
                     color={colors.magenta}
-                    style={tw`mr-2`}
+                    style={styles.buttonIcon}
                   />
-                  <Text
-                    style={[
-                      tw`text-center text-lg font-bold`,
-                      { color: colors.magenta },
-                    ]}
-                  >
+                  <Text style={[styles.buttonText, { color: colors.magenta }]}>
                     Ya tengo una cuenta
                   </Text>
                 </View>
@@ -281,3 +241,102 @@ export default function RegisterScreen() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  flex1: {
+    flex: 1,
+  },
+  scrollViewContent: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  container: {
+    paddingHorizontal: 24,
+    paddingVertical: 32,
+    marginTop: 24,
+  },
+  header: {
+    marginBottom: 48,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 8,
+    color: colors.yellow,
+  },
+  subtitle: {
+    fontSize: 18,
+    textAlign: "center",
+    color: colors.azul,
+  },
+  form: {
+    gap: 32,
+  },
+  inputLabelContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  icon: {
+    marginRight: 8,
+  },
+  inputLabel: {
+    color: "#fff",
+    fontSize: 14,
+  },
+  input: {
+    width: "100%",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    borderWidth: 1,
+  },
+  errorText: {
+    marginTop: 8,
+    color: "#f87171",
+    fontSize: 14,
+    marginLeft: 4,
+  },
+  buttonContainer: {
+    marginTop: 48,
+    marginBottom: 32,
+    gap: 24,
+  },
+  registerButton: {
+    width: "100%",
+    borderRadius: 24,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    backgroundColor: colors.azul,
+    shadowColor: colors.azul,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 6,
+  },
+  loginButton: {
+    width: "100%",
+    borderRadius: 24,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderWidth: 2,
+    borderColor: colors.magenta,
+    backgroundColor: "rgba(231, 87, 147, 0.1)",
+  },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  buttonIcon: {
+    marginRight: 8,
+  },
+  buttonText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#fff",
+  },
+});

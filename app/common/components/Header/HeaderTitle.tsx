@@ -9,16 +9,16 @@ export const HeaderTitle = () => {
       <Image 
         source={require('@/assets/images/icon-app.png')}
         style={{ 
-          width: 40, // Aumentado de 30 a 40
-          height: 40, // Aumentado de 30 a 40
-          marginRight: 12, // Aumentado de 8 a 12 para más espaciado
+          width: 40, 
+          height: 40, 
+          marginRight: 12, 
         }}
         resizeMode="contain"
       />
       <Text style={[
-        tw`font-bold text-xl`, // Cambiado de text-lg a text-xl
+        tw`font-bold text-xl`, 
         { 
-          color: colors.yellow, // Usar el color amarillo de la app
+          color: colors.yellow, 
           textShadowColor: 'rgba(0, 0, 0, 0.75)',
           textShadowOffset: { width: -1, height: 1 },
           textShadowRadius: 10

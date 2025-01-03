@@ -51,13 +51,7 @@ export default function LoginScreen() {
           error = "El email no es válido";
         }
         break;
-      case "password":
-        if (!value.trim()) {
-          error = "La contraseña es requerida";
-        } else if (value.length < 6) {
-          error = "La contraseña debe tener al menos 6 caracteres";
-        }
-        break;
+      // Eliminar la validación de la contraseña
     }
 
     setFormData((prev) => ({
@@ -74,8 +68,7 @@ export default function LoginScreen() {
     return (
       formData.email.value.trim() !== "" &&
       formData.password.value.trim() !== "" &&
-      !formData.email.error &&
-      !formData.password.error
+      !formData.email.error
     );
   };
 
@@ -144,64 +137,54 @@ export default function LoginScreen() {
 
         <View style={[styles.container]}>
           <View>
-            <Text style={tw`text-white text-sm mb-3 ml-1`}>
-              Correo electrónico
-            </Text>
-            <View style={tw`relative`}>
-              <View
-                style={tw`absolute inset-y-0 left-0 pl-4 flex items-center justify-center`}
-              >
-                <MaterialIcons name="email" size={18} color={colors.azul} />
-              </View>
-              <TextInput
-                style={[
-                  tw`w-full rounded-xl pl-12 pr-4 py-4 text-base border`,
-                  getFocusedStyle("email", "#10ccd0"),
-                ]}
-                placeholder="correo@ejemplo.com"
-                placeholderTextColor="#9ca3af"
-                value={formData.email.value}
-                onChangeText={(text) => handleChange("email", text)}
-                onFocus={() => setFocusedInput("email")}
-                onBlur={() => setFocusedInput(null)}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-              {formData.email.error && (
-                <Text style={[tw`text-red-500 text-sm mt-1 ml-1`]}>
-                  {formData.email.error}
-                </Text>
-              )}
+            <View style={tw`flex-row items-center mb-3`}>
+              <MaterialIcons name="email" size={18} color={colors.azul} style={tw`mr-2`} />
+              <Text style={tw`text-white text-sm`}>Correo electrónico</Text>
             </View>
+            <TextInput
+              style={[
+                tw`w-full rounded-xl pl-4 pr-4 py-4 text-base border`,
+                getFocusedStyle("email", "#10ccd0"),
+              ]}
+              placeholder="correo@ejemplo.com"
+              placeholderTextColor="#9ca3af"
+              value={formData.email.value}
+              onChangeText={(text) => handleChange("email", text)}
+              onFocus={() => setFocusedInput("email")}
+              onBlur={() => setFocusedInput(null)}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            {formData.email.error && (
+              <Text style={[tw`text-red-500 text-sm mt-1 ml-1`]}>
+                {formData.email.error}
+              </Text>
+            )}
           </View>
 
           <View>
-            <Text style={tw`text-white text-sm mb-3 ml-1`}>Contraseña</Text>
-            <View style={tw`relative`}>
-              <View
-                style={tw`absolute inset-y-0 left-0 pl-4 flex items-center justify-center`}
-              >
-                <MaterialIcons name="lock" size={18} color={colors.magenta} />
-              </View>
-              <TextInput
-                style={[
-                  tw`w-full rounded-xl pl-12 pr-4 py-4 text-base border`,
-                  getFocusedStyle("password", "#e75793"),
-                ]}
-                placeholder="Tu contraseña"
-                placeholderTextColor="#9ca3af"
-                value={formData.password.value}
-                onChangeText={(text) => handleChange("password", text)}
-                onFocus={() => setFocusedInput("password")}
-                onBlur={() => setFocusedInput(null)}
-                secureTextEntry
-              />
-              {formData.password.error && (
-                <Text style={[tw`text-red-500 text-sm mt-1 ml-1`]}>
-                  {formData.password.error}
-                </Text>
-              )}
+            <View style={tw`flex-row items-center mb-3`}>
+              <MaterialIcons name="lock" size={18} color={colors.magenta} style={tw`mr-2`} />
+              <Text style={tw`text-white text-sm`}>Contraseña</Text>
             </View>
+            <TextInput
+              style={[
+                tw`w-full rounded-xl pl-4 pr-4 py-4 text-base border`,
+                getFocusedStyle("password", "#e75793"),
+              ]}
+              placeholder="Tu contraseña"
+              placeholderTextColor="#9ca3af"
+              value={formData.password.value}
+              onChangeText={(text) => handleChange("password", text)}
+              onFocus={() => setFocusedInput("password")}
+              onBlur={() => setFocusedInput(null)}
+              secureTextEntry
+            />
+            {formData.password.error && (
+              <Text style={[tw`text-red-500 text-sm mt-1 ml-1`]}>
+                {formData.password.error}
+              </Text>
+            )}
           </View>
 
           <View style={[styles.buttonContainer]}>
@@ -276,11 +259,11 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    gap: 32, // equivalente a space-y-8
+    gap: 32, 
   },
   buttonContainer: {
-    gap: 24, // equivalente a space-y-6
-    marginTop: 48, // mt-12
-    marginBottom: 32, // mb-8
+    gap: 24, 
+    marginTop: 48, 
+    marginBottom: 32, 
   },
 });
