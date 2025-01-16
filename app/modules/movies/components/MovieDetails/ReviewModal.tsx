@@ -27,6 +27,7 @@ import {
 } from "../../services/reviewService";
 import { BackHandler } from 'react-native';
 import { useReviewContext } from "../../context/ReviewContext";
+import { useWatchlist } from "../../context/WatchlistContextGlobal";
 const { height } = Dimensions.get("window");
 
 interface ReviewModalProps {
@@ -84,7 +85,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
   const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const { triggerRefresh } = useReviewContext();
-
+  const { silentlyRefetchWatchlist } = useWatchlist();
   useEffect(() => {
     if (isVisible) {
       setRating(existingReview?.rating || 0);
@@ -92,6 +93,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
       setContainsSpoiler(existingReview?.containsSpoiler || false);
       setIsEditing(false);
       setShowReviewInput(!!existingReview);
+  
       const backHandler = BackHandler.addEventListener(
         'hardwareBackPress',
         () => {
@@ -99,6 +101,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
           return true;
         }
       );
+  
       return () => backHandler.remove();
     } else {
       resetStates();
@@ -126,7 +129,6 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
           setLocalIsWatched(false);
           onWatchedToggle();
         }
-        // Después quitar de watchlist
         await removeFromWatchlist(userId, movieId);
       } else {
         await addToWatchlist({
@@ -139,6 +141,10 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
       }
       setLocalIsInWatchlist(!localIsInWatchlist);
       onWatchlistToggle();
+      
+      // 4. Actualizar silenciosamente la watchlist
+      await silentlyRefetchWatchlist();
+      
     } catch (error) {
       console.error("Error toggling watchlist:", error);
       showToast("Error al actualizar la watchlist", "error");
@@ -259,6 +265,10 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
       visible={isVisible}
       transparent
       animationType="slide"
+      onRequestClose={() => {
+        console.log('Modal closing from hardware back press');
+        onClose();
+      }}
       statusBarTranslucent
     >
       <KeyboardAvoidingView

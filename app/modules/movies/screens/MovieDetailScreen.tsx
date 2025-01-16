@@ -130,6 +130,10 @@ const MovieDetailScreen: React.FC = () => {
     setReviewsKey((prev) => prev + 1);
   };
 
+  const handleCloseModal = () => {
+    setReviewModalVisible(false);
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -182,7 +186,7 @@ const MovieDetailScreen: React.FC = () => {
           movieTitle={movie.title}
           posterPath={movie.poster_path}
           releaseDate={movie.release_date}
-          onClose={() => setReviewModalVisible(false)}
+          onClose={handleCloseModal}
           isInWatchlist={movie.inWatchlist}
           isWatched={movie.viewed}
           onWatchlistToggle={handleWatchlistToggle}

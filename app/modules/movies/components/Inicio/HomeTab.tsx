@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ScrollView, Text, View, Animated } from "react-native";
+import {  Text, View, Animated } from "react-native";
 import { CarouselMovies } from "./CarouselMovies";
 import { useAuth } from "@/app/modules/auth/hooks/useAuth";
 import {

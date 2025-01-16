@@ -14,6 +14,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import { registerUser } from "../services/authServices";
 import { colors } from "../../../common/utils/constants";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useToast } from "@/app/common/components/Toast/useToast";
 
 export default function RegisterScreen() {
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
@@ -24,6 +25,7 @@ export default function RegisterScreen() {
     password: { value: "", error: "" },
   });
   const [loading, setLoading] = useState(false);
+  const { showToast } = useToast();
 
   const getFocusedStyle = (fieldName: string, color: string) => ({
     backgroundColor: "#2d2d2d",
@@ -88,11 +90,13 @@ export default function RegisterScreen() {
         formData.name.value
       );
       router.push("/modules/auth/screens/LoginScreen");
+      showToast('Usuario registrado correctamente', 'success');
     } catch (error: any) {
       setFormData((prev) => ({
         ...prev,
         email: { ...prev.email, error: error.message },
       }));
+      showToast('Error al registrar usuario', 'error');
     } finally {
       setLoading(false);
     }
