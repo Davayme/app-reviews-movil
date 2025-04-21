@@ -125,7 +125,7 @@ export default function LoginScreen() {
     <SafeAreaView
       style={[tw`flex-1`, { backgroundColor: colors["background-color"] }]}
     >
-      <View style={tw`flex-1 justify-center px-6`}>
+      <View style={tw`flex-1 justify-center px-6`} testID="login-form">
         <View style={tw`mb-12`}>
           <Text style={tw`text-4xl font-bold text-center mb-2 text-yellow-400`}>
             CineScore
@@ -205,7 +205,7 @@ export default function LoginScreen() {
               disabled={!isFormValid() || loading}
             >
               {loading ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator testID="loading-indicator" color="#fff" />
               ) : (
                 <View style={tw`flex-row items-center justify-center`}>
                   <FontAwesome
