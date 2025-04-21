@@ -107,6 +107,7 @@ export default function RegisterScreen() {
       <ScrollView
         contentContainerStyle={styles.scrollViewContent}
         keyboardShouldPersistTaps="handled"
+        testID="register-form"
       >
         <View style={styles.container}>
           <View style={styles.header}>

@@ -61,7 +61,7 @@ export default function IndexScreen() {
   if (loading) {
     return (
       <View style={[tw`flex-1 justify-center items-center`, styles.container]}>
-        <ActivityIndicator size="large" color="#fcbd00" />
+        <ActivityIndicator testID="loading-indicator" size="large" color="#fcbd00" />
       </View>
     );
   }
