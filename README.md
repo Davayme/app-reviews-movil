@@ -1,50 +1,80 @@
-# Welcome to your Expo app 👋
+# Cine Score 🎬
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicación móvil para descubrir, reseñar y gestionar películas. Los usuarios pueden explorar películas populares, escribir reseñas con calificaciones, mantener una lista de películas pendientes (watchlist) y ver las opiniones de otros usuarios.
 
-## Get started
+## Características principales
 
-1. Install dependencies
+- 🔐 Autenticación de usuarios (registro e inicio de sesión)
+- 🎥 Exploración de películas populares y en cartelera
+- 🔍 Búsqueda de películas
+- ⭐ Sistema de reseñas con calificación y detección de spoilers
+- 📋 Lista de películas por ver (Watchlist)
+- 👤 Perfil de usuario con historial de reseñas
+- ❤️ Sistema de likes en reseñas
+
+## Tecnologías utilizadas
+
+| Categoría | Tecnología |
+|-----------|------------|
+| **Framework** | [Expo](https://expo.dev) (SDK 52) |
+| **Lenguaje** | TypeScript |
+| **UI** | React Native |
+| **Navegación** | Expo Router (file-based routing) |
+| **Autenticación** | Firebase Authentication |
+| **Almacenamiento local** | AsyncStorage |
+| **Estilos** | Tailwind React Native Classnames |
+| **Animaciones** | React Native Reanimated, React Native Animatable |
+| **Gráficos** | React Native Chart Kit, React Native SVG |
+| **Componentes UI** | React Native Vector Icons, Expo Linear Gradient |
+
+## APIs utilizadas
+
+| API | Descripción |
+|-----|-------------|
+| **TMDB (The Movie Database)** | Obtención de información de películas, posters, calificaciones y búsqueda |
+| **Backend propio** | API REST para gestión de usuarios, reseñas, watchlist y likes |
+| **Firebase** | Autenticación de usuarios con email/contraseña |
+
+## Instalación
+
+1. Instalar dependencias
 
    ```bash
    npm install
    ```
 
-2. Start the app
+2. Iniciar la aplicación
 
    ```bash
-    npx expo start
+   npx expo start
    ```
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Comandos disponibles
 
 ```bash
-npm run reset-project
+npm start          # Inicia el servidor de desarrollo
+npm run android    # Inicia en Android
+npm run ios        # Inicia en iOS
+npm run web        # Inicia en navegador web
+npm run lint       # Ejecuta el linter
+npm test           # Ejecuta los tests
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Estructura del proyecto
 
-## Learn more
+```
+app/
+├── common/           # Componentes, interfaces y utilidades compartidas
+├── modules/
+│   ├── auth/         # Autenticación (login, registro)
+│   ├── movies/       # Películas (listado, detalle, reseñas, watchlist)
+│   └── users/        # Perfil de usuario
+├── _layout.tsx       # Layout principal con navegación
+└── index.tsx         # Pantalla inicial
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+## Aprender más
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- [Documentación de Expo](https://docs.expo.dev/)
+- [Tutorial de Expo](https://docs.expo.dev/tutorial/introduction/)
+- [TMDB API Documentation](https://developers.themoviedb.org/3)
